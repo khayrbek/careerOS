@@ -32,6 +32,11 @@
 
   <div id="kpis" class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6"></div>
 
+  <div class="card p-5 mb-6">
+    <h2 class="font-bold mb-4">🎯 Путь к целям</h2>
+    <div id="goals" class="grid md:grid-cols-2 gap-4"></div>
+  </div>
+
   <div class="grid md:grid-cols-2 gap-4 mb-6">
     <div class="card p-5">
       <h2 class="font-bold mb-4">Воронка статусов</h2>
@@ -91,8 +96,37 @@ let chart;
 async function load(){
   const r = await fetch('/api/data'); const d = await r.json();
   const items = d.items || [];
-  renderKPI(items); renderFunnel(items); renderChart(items); renderTable(items);
+  renderKPI(items); renderGoals(items); renderFunnel(items); renderChart(items); renderTable(items);
   renderCompanies(d.companies || []);
+}
+
+function bar(label, cur, target, color){
+  const pct = Math.min(100, Math.round(cur/Math.max(1,target)*100));
+  return `<div style="margin-bottom:8px">
+    <div class="flex justify-between text-xs mb-1"><span class="font-medium">${label}</span><span class="text-gray-500">${cur} / ${target}</span></div>
+    <div style="background:#eef1f5;border-radius:6px;height:10px"><div style="width:${pct}%;height:10px;border-radius:6px;background:${color}"></div></div>
+  </div>`;
+}
+
+function renderGoals(items){
+  const cnt = s => items.filter(i => i.status === s).length;
+  const applied = items.filter(i => i.applied || i.status === "Отклик отправлен" || i.status === "Просмотрен" || i.status === "Переписка" || i.status === "Собеседование" || i.status === "Оффер").length;
+  const interviews = cnt("Собеседование");
+  const offers = cnt("Оффер");
+  const convers = applied ? Math.round(interviews/applied*100) : 0;
+  document.getElementById('goals').innerHTML = `
+    <div>
+      <div class="font-semibold text-sm mb-3">🎯 Цель 1 — Оффер (ИИ / HR-Tech)</div>
+      ${bar("Отклики", applied, 50, "#3b82f6")}
+      ${bar("Собеседования", interviews, 5, "#10b981")}
+      ${bar("Оффер", offers, 1, "#059669")}
+      <div class="text-xs text-gray-500 mt-1">Конверсия отклик→собеседование: <b>${convers}%</b> · план ≥10%</div>
+    </div>
+    <div>
+      <div class="font-semibold text-sm mb-3">🎯 Цель 2 — Доход ≥ 360 000 ₽</div>
+      ${bar("Оффер с целевым доходом", offers, 1, "#8b5cf6")}
+      <div class="text-xs text-gray-500 mt-1">${offers ? "✅ Достигнуто" : "⏳ в процессе — ожидание оффера по целевой вилке"}</div>
+    </div>`;
 }
 
 function renderCompanies(list){

@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 620" font-family="Inter, -apple-system, Segoe UI, Roboto, sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/>
+    </marker>
+    <style>
+      .t { font-size: 13px; fill: #0f172a; font-weight: 600; }
+      .s { font-size: 11px; fill: #64748b; }
+      .h { font-size: 15px; fill: #0f172a; font-weight: 700; }
+      .box { fill: #ffffff; stroke: #e2e8f0; stroke-width: 1.5; rx: 12; }
+      .src { fill: #eff6ff; stroke: #bfdbfe; }
+      .core { fill: #f0fdf4; stroke: #bbf7d0; }
+      .out { fill: #fef3c7; stroke: #fde68a; }
+      .line { stroke: #94a3b8; stroke-width: 1.5; fill: none; marker-end: url(#ar); }
+    </style>
+  </defs>
+
+  <rect width="980" height="620" fill="#f8fafc"/>
+  <text x="30" y="38" class="h">careerOS — архитектура пайплайна</text>
+  <text x="30" y="58" class="s">AI-система поиска работы: сбор → анализ → генерация → действие → аналитика</text>
+
+  <!-- Источники -->
+  <text x="30" y="95" class="s" font-weight="700">ИСТОЧНИКИ</text>
+  <rect class="box src" x="30" y="108" width="180" height="64"/>
+  <text x="46" y="134" class="t">hh.ru</text>
+  <text x="46" y="152" class="s">вакансии · отклики · чаты</text>
+
+  <rect class="box src" x="225" y="108" width="180" height="64"/>
+  <text x="241" y="134" class="t">Telegram</text>
+  <text x="241" y="152" class="s">каналы с вакансиями</text>
+
+  <rect class="box src" x="420" y="108" width="180" height="64"/>
+  <text x="436" y="134" class="t">MAX (Bot API)</text>
+  <text x="436" y="152" class="s">группы вакансий</text>
+
+  <!-- Коллекторы -->
+  <rect class="box core" x="30" y="205" width="570" height="62"/>
+  <text x="46" y="230" class="t">Коллекторы</text>
+  <text x="46" y="250" class="s">парсинг · дедупликация · нормализация в единую базу</text>
+
+  <!-- Классификация -->
+  <rect class="box core" x="30" y="292" width="570" height="62"/>
+  <text x="46" y="317" class="t">Классификация и скоринг</text>
+  <text x="46" y="337" class="s">роль (HR-Tech / AI / IT / продукт) → резюме → релевантность 1–10</text>
+
+  <!-- LLM -->
+  <rect class="box core" x="30" y="379" width="570" height="62"/>
+  <text x="46" y="404" class="t">LLM-генерация письма</text>
+  <text x="46" y="424" class="s">YandexGPT-5-pro / GPT-OSS-120B · требования вакансии + факты</text>
+
+  <!-- Отправка -->
+  <rect class="box out" x="30" y="466" width="570" height="62"/>
+  <text x="46" y="491" class="t">Отправка действий</text>
+  <text x="46" y="511" class="s">Playwright: отклики · чаты · guardrails (лимиты, паузы, стоп)</text>
+
+  <!-- Правый столбец: CRM + дашборд -->
+  <text x="660" y="95" class="s" font-weight="700">АНАЛИТИКА</text>
+  <rect class="box" x="650" y="108" width="300" height="150"/>
+  <text x="670" y="136" class="h" font-size="14">CRM (Google Sheets)</text>
+  <text x="670" y="160" class="s">· воронка статусов</text>
+  <text x="670" y="180" class="s">· история откликов</text>
+  <text x="670" y="200" class="s">· целевые компании</text>
+  <text x="670" y="220" class="s">· следующий шаг</text>
+  <text x="670" y="240" class="s">· KPI и конверсии</text>
+
+  <rect class="box" x="650" y="288" width="300" height="150"/>
+  <text x="670" y="316" class="h" font-size="14">Дашборд (web)</text>
+  <text x="670" y="340" class="s">· KPI и воронка</text>
+  <text x="670" y="360" class="s">· динамика активности</text>
+  <text x="670" y="380" class="s">· компании-мечты</text>
+  <text x="670" y="400" class="s">· путь к целям</text>
+  <text x="670" y="420" class="s">· обновление каждые 45 с</text>
+
+  <rect class="box" x="650" y="466" width="300" height="62" style="fill:#f5f3ff;stroke:#ddd6fe"/>
+  <text x="670" y="491" class="t">Утренний дайджест</text>
+  <text x="670" y="511" class="s">сводка вместо потока уведомлений</text>
+
+  <!-- Стрелки -->
+  <path class="line" d="M120,172 L120,205"/>
+  <path class="line" d="M315,172 L315,205"/>
+  <path class="line" d="M510,172 L510,205"/>
+  <path class="line" d="M315,267 L315,292"/>
+  <path class="line" d="M315,354 L315,379"/>
+  <path class="line" d="M315,441 L315,466"/>
+  <path class="line" d="M600,497 L650,497"/>
+  <path class="line" d="M315,528 C 315,570 500,570 800,545" stroke-dasharray="4 4"/>
+  <path class="line" d="M800,466 L800,438"/>
+  <path class="line" d="M650,183 L600,183" stroke-dasharray="4 4"/>
+  <path class="line" d="M650,363 L600,363" stroke-dasharray="4 4"/>
+
+  <text x="30" y="570" class="s">Guardrails: 10 откликов/день · паузы 5–15 мин · стоп при капче · human-in-the-loop для переписки</text>
+  <text x="30" y="592" class="s">LLM · Playwright · REST API · Google Sheets · Bot API · cron</text>
+</svg>

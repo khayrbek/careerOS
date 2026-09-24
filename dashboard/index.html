@@ -94,7 +94,7 @@ function meta(s){ return STATUS_META[s] || { color:"#64748b", bg:"#f1f5f9" }; }
 
 let chart;
 async function load(){
-  const r = await fetch('/api/data'); const d = await r.json();
+  const r = await fetch('api/data'); const d = await r.json();
   const items = d.items || [];
   renderKPI(items); renderGoals(items); renderFunnel(items); renderChart(items); renderTable(items);
   renderCompanies(d.companies || []);

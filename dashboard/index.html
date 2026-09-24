@@ -128,7 +128,7 @@
 
   <!-- КОМПАНИИ -->
   <div class="card">
-    <h2 style="margin-bottom:6px">🎯 Компании-мечты</h2>
+    <h2 style="margin-bottom:6px">ShortList</h2>
     <p class="label" style="margin-bottom:18px">целевой трек — приоритет вне общего скоринга</p>
     <div id="companies"></div>
   </div>
@@ -277,10 +277,7 @@ function renderCompanies(list){
       <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px">
         ${g.items.map(c => `
           <div class="co-card">
-            <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px">
-              <span class="co-name">${c.name}</span>
-              <span class="co-prio">${c.prio}</span>
-            </div>
+            <div class="co-name">${c.name}</div>
             <div class="co-why">${c.why||''}</div>
             ${c.search ? `<a class="co-link" href="${c.search}" target="_blank" rel="noopener">вакансии ↗</a>` : ''}
           </div>`).join('')}

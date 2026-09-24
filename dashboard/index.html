@@ -3,213 +3,309 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Поиск работы — дашборд</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>CareerOS — система персонального карьерного развития</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
-  * { font-family: 'Inter', sans-serif; }
-  body { background:#f6f7f9; }
-  .card { background:#fff; border:1px solid #eceef1; border-radius:16px; }
-  .badge { display:inline-block; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:600; white-space:nowrap; }
-  .funnel-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
-  .funnel-bar { height:28px; border-radius:6px; transition:width .4s; min-width:2px; }
-  .lnk { color:#2563eb; font-weight:600; text-decoration:none; }
-  .lnk:hover { text-decoration:underline; }
-  @media (max-width: 768px) { .kpi-num { font-size:22px; } }
+  :root{
+    --bg:#0b0d10; --bg2:#111419; --card:rgba(255,255,255,.035);
+    --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.14);
+    --fg:#eef1f5; --muted:#8b96a5; --accent:#4ade80; --cyan:#22d3ee;
+    --violet:#a78bfa; --amber:#fbbf24; --rose:#fb7185;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{
+    background:var(--bg); color:var(--fg);
+    font-family:'Inter',system-ui,sans-serif; font-size:15px; line-height:1.5;
+    background-image:
+      radial-gradient(900px 500px at 12% -10%, rgba(74,222,128,.10), transparent 60%),
+      radial-gradient(800px 500px at 88% 0%, rgba(34,211,238,.08), transparent 60%),
+      linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+    background-size:auto, auto, 42px 42px, 42px 42px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px; margin:0 auto; padding:36px 22px 70px}
+  .mono{font-family:'JetBrains Mono',monospace}
+  h1{font-family:'Space Grotesk'; font-size:clamp(24px,3vw,34px); font-weight:700; letter-spacing:-.02em}
+  h2{font-family:'Space Grotesk'; font-size:16px; font-weight:600; letter-spacing:.01em}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    backdrop-filter:blur(12px); padding:20px;
+    transition:border-color .25s, transform .25s;
+  }
+  .card:hover{border-color:var(--line2)}
+  .label{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); font-family:'JetBrains Mono'}
+  .kpi{font-family:'JetBrains Mono'; font-size:34px; font-weight:700; line-height:1.1}
+  .glow-a{text-shadow:0 0 22px rgba(74,222,128,.45)}
+  .glow-c{text-shadow:0 0 22px rgba(34,211,238,.4)}
+  .glow-v{text-shadow:0 0 22px rgba(167,139,250,.4)}
+  .grid{display:grid; gap:14px}
+  .g4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+  .row{display:flex; align-items:flex-start; gap:14px}
+  .bar{background:rgba(255,255,255,.07); border-radius:99px; height:9px; overflow:hidden}
+  .bar>i{display:block; height:100%; border-radius:99px; transition:width .8s cubic-bezier(.2,.8,.2,1)}
+  table{width:100%; border-collapse:collapse; font-size:13.5px}
+  th{text-align:left; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+     font-weight:500; padding:8px 10px; border-bottom:1px solid var(--line)}
+  td{padding:10px; border-bottom:1px solid rgba(255,255,255,.05)}
+  tr:hover td{background:rgba(255,255,255,.025)}
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+  .pill{display:inline-block; padding:2px 9px; border-radius:99px; font-size:11.5px;
+        border:1px solid var(--line2); font-family:'JetBrains Mono'}
+  .btn{border:1px solid var(--line2); background:transparent; color:var(--fg);
+       padding:8px 14px; border-radius:10px; cursor:pointer; font-size:13px; font-family:'Inter'}
+  .btn:hover{border-color:var(--accent); color:var(--accent)}
+  .cohort{margin-bottom:26px}
+  .cohort-h{font-family:'Space Grotesk'; font-weight:600; font-size:14px; padding-bottom:8px;
+            border-bottom:1px solid var(--line); margin-bottom:10px; display:flex; justify-content:space-between}
+  .fade{animation:fade .5s ease both}
+  @keyframes fade{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+  .pulse{animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1} 50%{opacity:.55}}
 </style>
 </head>
-<body class="text-gray-800">
-<div class="max-w-6xl mx-auto px-4 py-6 md:py-8">
+<body>
+<div class="wrap">
 
-  <div class="flex items-center justify-between mb-6">
+  <div class="row" style="justify-content:space-between; align-items:center; margin-bottom:26px">
     <div>
-      <h1 class="text-2xl md:text-3xl font-extrabold">CareerOS</h1>
-      <p class="text-gray-500 text-sm mt-1">Система персонального карьерного развития · Ажимов Хайрбек</p>
+      <h1>CareerOS</h1>
+      <p class="label" style="margin-top:6px">Система персонального карьерного развития · Ажимов Хайрбек</p>
     </div>
-    <button onclick="load()" class="text-sm px-3 py-2 rounded-lg bg-gray-900 text-white hover:bg-gray-700">↻ Обновить</button>
+    <button class="btn" onclick="load()">↻ Обновить</button>
   </div>
 
-  <div id="kpis" class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6"></div>
+  <!-- KPI -->
+  <div class="grid g4" id="kpi" style="margin-bottom:18px"></div>
 
-  <div class="card p-5 mb-6">
-    <h2 class="font-bold mb-4">🎯 Путь к целям</h2>
-    <div id="goals" class="grid md:grid-cols-2 gap-4"></div>
+  <!-- ЦЕЛИ -->
+  <div class="card" style="margin-bottom:18px">
+    <h2 style="margin-bottom:16px">🎯 Путь к целям</h2>
+    <div class="grid g2" id="goals"></div>
   </div>
 
-  <div class="grid md:grid-cols-2 gap-4 mb-6">
-    <div class="card p-5">
-      <h2 class="font-bold mb-4">Воронка статусов</h2>
-      <div id="funnel"></div>
-    </div>
-    <div class="card p-5">
-      <h2 class="font-bold mb-4">Активность по датам</h2>
-      <canvas id="chart" height="180"></canvas>
-    </div>
+  <!-- ВОРОНКА + ГРАФИК -->
+  <div class="grid g2" style="margin-bottom:18px">
+    <div class="card"><h2 style="margin-bottom:16px">Воронка статусов</h2><div id="funnel"></div></div>
+    <div class="card"><h2 style="margin-bottom:16px">Динамика откликов</h2><canvas id="chart" height="180"></canvas></div>
   </div>
 
-  <div class="card p-5">
-    <h2 class="font-bold mb-4">Вакансии</h2>
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="text-left text-gray-500 border-b">
-            <th class="py-2 pr-3">Дата</th>
-            <th class="py-2 pr-3">Вакансия</th>
-            <th class="py-2 pr-3">Компания</th>
-            <th class="py-2 pr-3">Статус</th>
-            <th class="py-2 pr-3">Рел.</th>
-            <th class="py-2 pr-3">Источник</th>
-          </tr>
-        </thead>
+  <!-- АУТРИЧ -->
+  <div class="card" style="margin-bottom:18px">
+    <h2 style="margin-bottom:6px">🤝 Аутрич (Сетка / LinkedIn / TG)</h2>
+    <p class="label" style="margin-bottom:16px">прямые сообщения нанимателям — в обход вакансий</p>
+    <div class="grid g4" id="outreach-kpi" style="margin-bottom:16px"></div>
+    <div id="outreach"></div>
+  </div>
+
+  <!-- ВАКАНСИИ -->
+  <div class="card" style="margin-bottom:18px">
+    <h2 style="margin-bottom:16px">📋 Вакансии</h2>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th>Дата</th><th>Вакансия</th><th>Компания</th><th>Резюме</th>
+          <th>Статус</th><th>Рел.</th><th>Источник</th>
+        </tr></thead>
         <tbody id="rows"></tbody>
       </table>
     </div>
-    <p id="empty" class="text-gray-400 text-sm py-6 text-center hidden">Пока пусто</p>
   </div>
 
-  <div class="card p-5 mt-6">
-    <h2 class="font-bold mb-4">🎯 Компании-мечты <span class="text-gray-400 font-normal text-sm">— целевой трек</span></h2>
-    <div id="companies" class="grid md:grid-cols-2 gap-2"></div>
+  <!-- КОМПАНИИ -->
+  <div class="card">
+    <h2 style="margin-bottom:6px">🎯 Компании-мечты</h2>
+    <p class="label" style="margin-bottom:18px">целевой трек — приоритет вне общего скоринга</p>
+    <div id="companies"></div>
   </div>
 
-  <p class="text-center text-gray-400 text-xs mt-6">Данные: Google Sheets CRM · обновление каждые 45 сек</p>
+  <p class="label" style="text-align:center; margin-top:26px">
+    CareerOS · данные Google Sheets · автообновление 45 сек
+  </p>
 </div>
 
 <script>
-// === Корректная статусная модель (воронка) ===
-const STATUS_META = {
-  "Новая":             { color:"#3b82f6", bg:"#dbeafe" },
-  "Отклик отправлен":  { color:"#f59e0b", bg:"#fef3c7" },
-  "Просмотрен":        { color:"#0ea5e9", bg:"#e0f2fe" },
-  "Переписка":         { color:"#8b5cf6", bg:"#ede9fe" },
-  "Собеседование":     { color:"#10b981", bg:"#d1fae5" },
-  "Оффер":             { color:"#059669", bg:"#d1fae5" },
-  "Отказ":             { color:"#ef4444", bg:"#fee2e2" },
-  "Неактуальна":       { color:"#9ca3af", bg:"#f3f4f6" },
+const STATUS = {
+  "Новая":            {c:"#8b96a5", e:"🆕"},
+  "Отклик отправлен": {c:"#22d3ee", e:"✉️"},
+  "Просмотрен":       {c:"#a78bfa", e:"👀"},
+  "Переписка":        {c:"#fbbf24", e:"💬"},
+  "Собеседование":    {c:"#4ade80", e:"📅"},
+  "Оффер":            {c:"#34d399", e:"🎯"},
+  "Отказ":            {c:"#fb7185", e:"❌"},
+  "Неактуальна":      {c:"#6b7280", e:"📦"}
 };
-// порядок воронки
-const ORDER = ["Новая","Отклик отправлен","Просмотрен","Переписка","Собеседование","Оффер","Отказ","Неактуальна"];
-function meta(s){ return STATUS_META[s] || { color:"#64748b", bg:"#f1f5f9" }; }
-
+const meta = s => STATUS[s] || {c:"#8b96a5", e:"•"};
 let chart;
+
 async function load(){
   const r = await fetch('api/data'); const d = await r.json();
   const items = d.items || [];
-  renderKPI(items); renderGoals(items); renderFunnel(items); renderChart(items); renderTable(items);
-  renderCompanies(d.companies || []);
+  renderKPI(items); renderGoals(items); renderFunnel(items); renderChart(items);
+  renderTable(items); renderCompanies(d.companies || []);
+  renderOutreach(d.outreach || []);
 }
 
-function bar(label, cur, target, color){
-  const pct = Math.min(100, Math.round(cur/Math.max(1,target)*100));
-  return `<div style="margin-bottom:8px">
-    <div class="flex justify-between text-xs mb-1"><span class="font-medium">${label}</span><span class="text-gray-500">${cur} / ${target}</span></div>
-    <div style="background:#eef1f5;border-radius:6px;height:10px"><div style="width:${pct}%;height:10px;border-radius:6px;background:${color}"></div></div>
-  </div>`;
+function renderKPI(items){
+  const cnt = s => items.filter(i => i.status === s).length;
+  const total = items.length;
+  const app = items.filter(i => i.applied).length;
+  const kpis = [
+    ["Всего вакансий", total, "#22d3ee", "glow-c"],
+    ["Откликов", app, "#4ade80", "glow-a"],
+    ["Собеседований", cnt("Собеседование"), "#a78bfa", "glow-v"],
+    ["Офферов", cnt("Оффер"), "#34d399", "glow-a"],
+  ];
+  document.getElementById('kpi').innerHTML = kpis.map(([l,v,c,g]) => `
+    <div class="card fade">
+      <div class="label">${l}</div>
+      <div class="kpi ${g}" style="color:${c}; margin-top:8px">${v}</div>
+    </div>`).join('');
 }
 
 function renderGoals(items){
   const cnt = s => items.filter(i => i.status === s).length;
-  const applied = items.filter(i => i.applied || i.status === "Отклик отправлен" || i.status === "Просмотрен" || i.status === "Переписка" || i.status === "Собеседование" || i.status === "Оффер").length;
-  const interviews = cnt("Собеседование");
-  const offers = cnt("Оффер");
-  const convers = applied ? Math.round(interviews/applied*100) : 0;
+  const app = items.filter(i => i.applied).length;
+  const iv = cnt("Собеседование"), of = cnt("Оффер");
+  const conv = app ? Math.round(iv / app * 100) : 0;
+  const bar = (label, cur, target, color) => {
+    const p = Math.min(100, Math.round(cur / Math.max(1, target) * 100));
+    return `<div style="margin-bottom:12px">
+      <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px">
+        <span>${label}</span><span class="mono" style="color:var(--muted)">${cur} / ${target}</span></div>
+      <div class="bar"><i style="width:${p}%; background:linear-gradient(90deg,${color},${color}88)"></i></div>
+    </div>`;
+  };
   document.getElementById('goals').innerHTML = `
     <div>
-      <div class="font-semibold text-sm mb-3">🎯 Цель 1 — Оффер (ИИ / HR-Tech)</div>
-      ${bar("Отклики", applied, 50, "#3b82f6")}
-      ${bar("Собеседования", interviews, 5, "#10b981")}
-      ${bar("Оффер", offers, 1, "#059669")}
-      <div class="text-xs text-gray-500 mt-1">Конверсия отклик→собеседование: <b>${convers}%</b> · план ≥10%</div>
+      <div style="font-size:13.5px; font-weight:600; margin-bottom:14px">🎯 Цель 1 — Оффер (ИИ / HR-Tech)</div>
+      ${bar("Отклики", app, 50, "#4ade80")}
+      ${bar("Собеседования", iv, 5, "#a78bfa")}
+      ${bar("Оффер", of, 1, "#34d399")}
+      <div class="label" style="margin-top:6px">Конверсия отклик→собеседование: ${conv}% · план ≥10%</div>
     </div>
     <div>
-      <div class="font-semibold text-sm mb-3">🎯 Цель 2 — Доход ≥ 360 000 ₽</div>
-      ${bar("Оффер с целевым доходом", offers, 1, "#8b5cf6")}
-      <div class="text-xs text-gray-500 mt-1">${offers ? "✅ Достигнуто" : "⏳ в процессе — ожидание оффера по целевой вилке"}</div>
+      <div style="font-size:13.5px; font-weight:600; margin-bottom:14px">🎯 Цель 2 — Доход ≥ 360 000 ₽</div>
+      ${bar("Оффер с целевым доходом", of, 1, "#22d3ee")}
+      <div class="label" style="margin-top:6px">${of ? "✅ Достигнуто" : "⏳ в процессе — ожидание оффера по целевой вилке"}</div>
     </div>`;
 }
 
-function renderCompanies(list){
-  const el = document.getElementById('companies');
-  if(!list.length){ el.innerHTML = '<p class="text-gray-400 text-sm">Список пуст</p>'; return; }
-  el.innerHTML = list.map(c => {
-    const link = c.search ? `<a class="lnk text-xs" href="${c.search}" target="_blank" rel="noopener">вакансии ↗</a>` : '';
-    return `<div class="flex items-start justify-between gap-3 border-b border-gray-50 py-2">
-      <div>
-        <div class="font-semibold text-sm">${c.prio} ${c.name}</div>
-        <div class="text-xs text-gray-500">${c.category||''} ${c.why ? '· '+c.why : ''}</div>
-      </div>
-      <div class="whitespace-nowrap">${link}</div>
+function renderFunnel(items){
+  const order = ["Новая","Отклик отправлен","Просмотрен","Переписка","Собеседование","Оффер","Отказ","Неактуальна"];
+  const max = Math.max(1, ...order.map(s => items.filter(i => i.status === s).length));
+  document.getElementById('funnel').innerHTML = order.map(s => {
+    const n = items.filter(i => i.status === s).length;
+    const m = meta(s);
+    return `<div style="margin-bottom:11px">
+      <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:5px">
+        <span>${m.e} ${s}</span><span class="mono" style="color:${m.c}">${n}</span></div>
+      <div class="bar"><i style="width:${Math.round(n/max*100)}%; background:linear-gradient(90deg,${m.c},${m.c}55)"></i></div>
     </div>`;
   }).join('');
 }
 
-function renderKPI(items){
-  const count = s => items.filter(i => i.status === s).length;
-  const active = items.filter(i => !["Отказ","Неактуальна"].includes(i.status)).length;
-  const kp = [
-    ["Всего", items.length, "#111827"],
-    ["Активные", active, "#2563eb"],
-    ["Собеседования", count("Собеседование"), "#10b981"],
-    ["Офферы", count("Оффер"), "#059669"],
-    ["Отказы", count("Отказ"), "#ef4444"],
-    ["Ждут ответа", count("Отклик отправлен")+count("Просмотрен"), "#f59e0b"],
-  ];
-  document.getElementById('kpis').innerHTML = kp.map(([label,val,col]) => `
-    <div class="card p-4">
-      <div class="text-xs text-gray-500 font-medium">${label}</div>
-      <div class="kpi-num text-3xl font-extrabold mt-1" style="color:${col}">${val}</div>
-    </div>`).join('');
-}
-
-function renderFunnel(items){
-  const counts = {};
-  items.forEach(i => counts[i.status] = (counts[i.status]||0)+1);
-  const statuses = ORDER.filter(s => counts[s]);
-  Object.keys(counts).forEach(s => { if(!statuses.includes(s)) statuses.push(s); });
-  const max = Math.max(1, ...Object.values(counts));
-  document.getElementById('funnel').innerHTML = statuses.map(s => {
-    const c = counts[s]; const pct = Math.round(c/max*100); const m = meta(s);
-    return `<div class="funnel-row">
-      <div style="width:150px;font-size:13px;font-weight:600">${s}</div>
-      <div class="flex-1 bg-gray-100 rounded" style="border-radius:6px">
-        <div class="funnel-bar" style="width:${pct}%;background:${m.color}"></div>
-      </div>
-      <div style="width:28px;text-align:right;font-weight:700;color:${m.color}">${c}</div>
-    </div>`;
-  }).join('') || '<p class="text-gray-400 text-sm">Нет данных</p>';
-}
-
 function renderChart(items){
-  const byDate = {};
-  items.forEach(i => { const d = i.date || "—"; byDate[d] = (byDate[d]||0)+1; });
-  const labels = Object.keys(byDate).slice(-14);
-  const data = labels.map(l => byDate[l]);
+  const days = {};
+  items.filter(i => i.applied).forEach(i => {
+    const d = (i.applied || "").slice(0,10);
+    days[d] = (days[d] || 0) + 1;
+  });
+  const labels = Object.keys(days).sort().slice(-14);
+  const data = labels.map(d => days[d]);
   if(chart) chart.destroy();
   chart = new Chart(document.getElementById('chart'), {
-    type:'bar',
-    data:{ labels, datasets:[{ data, backgroundColor:'#3b82f6', borderRadius:6 }] },
-    options:{ plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, ticks:{precision:0}} } }
+    type:'line',
+    data:{ labels, datasets:[{
+      data, borderColor:'#4ade80', backgroundColor:'rgba(74,222,128,.14)',
+      fill:true, tension:.4, pointRadius:3, pointBackgroundColor:'#4ade80', borderWidth:2
+    }]},
+    options:{
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'#8b96a5', font:{size:10}}},
+        y:{grid:{color:'rgba(255,255,255,.05)'}, ticks:{color:'#8b96a5', font:{size:10}}, beginAtZero:true}
+      }
+    }
   });
 }
 
 function renderTable(items){
-  const tb = document.getElementById('rows');
-  const sorted = [...items].sort((a,b)=> (b.date||"").localeCompare(a.date||""));
-  tb.innerHTML = sorted.map(i => {
+  document.getElementById('rows').innerHTML = items.slice().reverse().map(i => {
     const m = meta(i.status);
-    const vac = i.url ? `<a class="lnk" href="${i.url}" target="_blank" rel="noopener">${i.vacancy||'—'}</a>` : (i.vacancy||'—');
-    return `<tr class="border-b border-gray-50 hover:bg-gray-50">
-      <td class="py-2 pr-3 text-gray-500 whitespace-nowrap">${i.date||''}</td>
-      <td class="py-2 pr-3 font-medium">${vac}</td>
-      <td class="py-2 pr-3">${i.company||''}</td>
-      <td class="py-2 pr-3"><span class="badge" style="color:${m.color};background:${m.bg}">${i.status}</span></td>
-      <td class="py-2 pr-3 font-semibold">${i.relevance||''}</td>
-      <td class="py-2 pr-3 text-gray-500 text-xs">${i.source||''}</td>
+    const vac = i.url ? `<a href="${i.url}" target="_blank" rel="noopener">${i.vacancy||'—'}</a>` : (i.vacancy||'—');
+    return `<tr>
+      <td class="mono" style="color:var(--muted); font-size:12px">${i.date||''}</td>
+      <td>${vac}</td>
+      <td style="color:var(--muted)">${i.company||''}</td>
+      <td class="label">${i.resume||''}</td>
+      <td><span class="pill" style="color:${m.c}; border-color:${m.c}66">${m.e} ${i.status||''}</span></td>
+      <td class="mono" style="color:${+i.relevance>=8?'#4ade80':'#8b96a5'}">${i.relevance||''}</td>
+      <td class="label">${i.source||''}</td>
     </tr>`;
   }).join('');
-  document.getElementById('empty').classList.toggle('hidden', items.length>0);
 }
+
+function renderCompanies(list){
+  const el = document.getElementById('companies');
+  if(!list.length){ el.innerHTML = '<p class="label">Список пуст</p>'; return; }
+  const groups = [];
+  list.forEach(c => {
+    const k = c.category || 'Прочее';
+    let g = groups.find(x => x.k === k);
+    if(!g){ g = {k, items: []}; groups.push(g); }
+    g.items.push(c);
+  });
+  el.innerHTML = groups.map(g => `
+    <div class="cohort">
+      <div class="cohort-h">${g.k}<span class="mono" style="color:var(--muted)">${g.items.length}</span></div>
+      <div class="grid g2">
+        ${g.items.map(c => `
+          <div class="row" style="justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.05)">
+            <div>
+              <div style="font-size:13.5px; font-weight:600">${c.prio} ${c.name}</div>
+              <div class="label" style="text-transform:none; letter-spacing:0">${c.why||''}</div>
+            </div>
+            ${c.search ? `<a class="label" href="${c.search}" target="_blank" rel="noopener">вакансии ↗</a>` : ''}
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function renderOutreach(list){
+  const total = list.length;
+  const sent = list.filter(o => (o.status||'').toLowerCase().includes('отправ')).length;
+  const replied = list.filter(o => (o.reply||'').trim()).length;
+  document.getElementById('outreach-kpi').innerHTML = [
+    ["Сообщений", total, "#22d3ee"],
+    ["Отправлено", sent, "#4ade80"],
+    ["Ответов", replied, "#a78bfa"],
+    ["Каналов", new Set(list.map(o => o.channel).filter(Boolean)).size, "#fbbf24"],
+  ].map(([l,v,c]) => `<div class="card fade"><div class="label">${l}</div>
+      <div class="kpi mono" style="color:${c}; font-size:26px; margin-top:6px">${v}</div></div>`).join('');
+
+  const el = document.getElementById('outreach');
+  if(!list.length){
+    el.innerHTML = '<p class="label">Пока пусто — аутрич ещё не запущен. Как только пойдут сообщения в Сетке, они появятся здесь.</p>';
+    return;
+  }
+  el.innerHTML = `<div style="overflow-x:auto"><table><thead><tr>
+      <th>Дата</th><th>Компания</th><th>Контакт</th><th>Канал</th><th>Повод</th><th>Статус</th><th>Ответ</th>
+    </tr></thead><tbody>${list.slice().reverse().map(o => `<tr>
+      <td class="mono" style="color:var(--muted); font-size:12px">${o.date||''}</td>
+      <td>${o.company||''}</td>
+      <td style="color:var(--muted)">${o.contact||''}</td>
+      <td><span class="pill">${o.channel||''}</span></td>
+      <td class="label" style="text-transform:none; letter-spacing:0">${o.reason||''}</td>
+      <td>${o.status||''}</td>
+      <td style="color:var(--accent)">${o.reply||''}</td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+
 load();
 setInterval(load, 45000);
 </script>

@@ -6,6 +6,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 SHEET_ID = "1cNzjNK8gZMwag8TbJ1SmwNViaIlRDzDfS4EGNWf-kvY"
 COMPANIES_SHEET_ID = "13I_d2FiGd3xZ3yx6Y9dV7pw6dleVkDhk1UCjRXgr3zc"
+OUTREACH_SHEET_ID = "1GwnXoOGTYnTGHR1s29Wv0Y3xg7bZPp_MkKrZbMgTHb4"
 GAPI = "/root/.hermes/skills/productivity/google-workspace/scripts/google_api.py"
 PY = "/usr/local/lib/hermes-agent/venv/bin/python3"
 PORT = 8902
@@ -41,6 +42,38 @@ def normalize_companies(rows):
             continue
         out.append({"prio": row[0], "name": row[1], "category": row[2],
                     "why": row[3], "search": row[4], "status": row[5]})
+    return out
+
+
+_oc = {"t": 0, "rows": []}
+
+
+def read_outreach():
+    now = time.time()
+    if now - _oc["t"] < CACHE_TTL and _oc["rows"]:
+        return _oc["rows"]
+    try:
+        r = subprocess.run([PY, GAPI, "sheets", "get", OUTREACH_SHEET_ID, "Аутрич!A1:I500"],
+                           capture_output=True, text=True, timeout=30)
+        rows = json.loads(r.stdout) if r.stdout.strip() else []
+    except Exception:
+        rows = _oc["rows"]
+    _oc["t"] = now
+    _oc["rows"] = rows
+    return rows
+
+
+def normalize_outreach(rows):
+    if not rows:
+        return []
+    out = []
+    for row in rows[1:]:
+        row = (row + [""] * (9 - len(row)))[:9]
+        if not any(c.strip() for c in row):
+            continue
+        out.append({"date": row[0], "company": row[1], "contact": row[2],
+                    "position": row[3], "channel": row[4], "reason": row[5],
+                    "message": row[6], "status": row[7], "reply": row[8]})
     return out
 
 
@@ -95,7 +128,8 @@ class Handler(BaseHTTPRequestHandler):
         if self.path.startswith("/api/data"):
             items = normalize(read_sheet())
             companies = normalize_companies(read_companies())
-            self._send(200, json.dumps({"items": items, "companies": companies}, ensure_ascii=False))
+            outreach = normalize_outreach(read_outreach())
+            self._send(200, json.dumps({"items": items, "companies": companies, "outreach": outreach}, ensure_ascii=False))
         elif self.path in ("/", "/index.html"):
             try:
                 with open(os.path.join(BASE_DIR, "index.html"), "rb") as f:

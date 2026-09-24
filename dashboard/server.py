@@ -136,6 +136,12 @@ class Handler(BaseHTTPRequestHandler):
                     self._send(200, f.read(), "text/html; charset=utf-8")
             except FileNotFoundError:
                 self._send(404, "index.html not found", "text/plain; charset=utf-8")
+        elif self.path in ("/about", "/about.html", "/product"):
+            try:
+                with open(os.path.join(BASE_DIR, "about.html"), "rb") as f:
+                    self._send(200, f.read(), "text/html; charset=utf-8")
+            except FileNotFoundError:
+                self._send(404, "about.html not found", "text/plain; charset=utf-8")
         else:
             self._send(404, "not found", "text/plain; charset=utf-8")
 

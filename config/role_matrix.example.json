@@ -1,0 +1,56 @@
+{
+  "limits": {
+    "max_per_day": 10,
+    "min_score": 8,
+    "pause_between_sec": [300, 900],
+    "stop_on_captcha": true,
+    "cover_mode": "llm"
+  },
+  "roles": [
+    {
+      "name": "Руководитель проектов ИИ / AI",
+      "resume": "Руководитель ИИ проектов",
+      "priority": 1,
+      "keywords": ["ии ", "ии-", "искусственн", " ai ", "ai ", "llm", "genai", "gpt", "агент", "нейросет", "machine learning", "ml "],
+      "ai_paragraph": true
+    },
+    {
+      "name": "Руководитель проектов HR-Tech",
+      "resume": "Руководитель проектов HR-tech",
+      "priority": 2,
+      "keywords": ["hr tech", "hr-tech", "hrtech", "hr-тех", "кадров", "hr-систем", "hrсистем", "подбор", "персонал"]
+    },
+    {
+      "name": "Владелец продукта HR-Tech / PM",
+      "resume": "Владелец продукта",
+      "priority": 3,
+      "keywords": ["product owner", "владелец продукта", "менеджер продукта", "product manager", "продукт"]
+    },
+    {
+      "name": "Технический руководитель HR-Tech",
+      "resume": "Технический руководитель HR-Tech решений",
+      "priority": 4,
+      "keywords": ["технический руководитель", "tech lead", "тимлид", "архитектор"]
+    },
+    {
+      "name": "Ведущий консультант SAP HCM",
+      "resume": "Ведущий консультант SAP HCM",
+      "priority": 5,
+      "keywords": ["sap", "hcm", "зуп"]
+    },
+    {
+      "name": "Руководитель ИТ-проектов",
+      "resume": "Руководитель ИТ проектов",
+      "priority": 6,
+      "keywords": ["руководитель ит", "руководитель и-проект", "менеджер проектов", "ит-проект", "it project", "руководитель проектов", "управлени проектами", "pmo"]
+    },
+    {
+      "name": "Аналитик HR-Tech / ИИ (нет резюме)",
+      "resume": null,
+      "priority": 9,
+      "keywords": ["аналитик", "business analyst", "системный аналитик"]
+    }
+  ],
+  "skip_keywords": ["рекрутер", "менеджер по продажам", "бухгалтер", "маркетолог", "водитель", "курьер", "оператор call", "кассир", "юрист", "охран", "повар", "продавец", "SMM", "дизайнер интерьера", "1C разработчик", "1С программист"],
+  "cover_template_file": "/root/.hermes/covers/_template.txt"
+}

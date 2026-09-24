@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Поиск работы — дашборд</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  * { font-family: 'Inter', sans-serif; }
+  body { background:#f6f7f9; }
+  .card { background:#fff; border:1px solid #eceef1; border-radius:16px; }
+  .badge { display:inline-block; padding:2px 10px; border-radius:999px; font-size:12px; font-weight:600; white-space:nowrap; }
+  .funnel-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .funnel-bar { height:28px; border-radius:6px; transition:width .4s; min-width:2px; }
+  .lnk { color:#2563eb; font-weight:600; text-decoration:none; }
+  .lnk:hover { text-decoration:underline; }
+  @media (max-width: 768px) { .kpi-num { font-size:22px; } }
+</style>
+</head>
+<body class="text-gray-800">
+<div class="max-w-6xl mx-auto px-4 py-6 md:py-8">
+
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-extrabold">careerOS</h1>
+      <p class="text-gray-500 text-sm mt-1">Ажимов Хайрбек · система поиска работы на базе ИИ</p>
+    </div>
+    <button onclick="load()" class="text-sm px-3 py-2 rounded-lg bg-gray-900 text-white hover:bg-gray-700">↻ Обновить</button>
+  </div>
+
+  <div id="kpis" class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6"></div>
+
+  <div class="grid md:grid-cols-2 gap-4 mb-6">
+    <div class="card p-5">
+      <h2 class="font-bold mb-4">Воронка статусов</h2>
+      <div id="funnel"></div>
+    </div>
+    <div class="card p-5">
+      <h2 class="font-bold mb-4">Активность по датам</h2>
+      <canvas id="chart" height="180"></canvas>
+    </div>
+  </div>
+
+  <div class="card p-5">
+    <h2 class="font-bold mb-4">Вакансии</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-gray-500 border-b">
+            <th class="py-2 pr-3">Дата</th>
+            <th class="py-2 pr-3">Вакансия</th>
+            <th class="py-2 pr-3">Компания</th>
+            <th class="py-2 pr-3">Статус</th>
+            <th class="py-2 pr-3">Рел.</th>
+            <th class="py-2 pr-3">Источник</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p id="empty" class="text-gray-400 text-sm py-6 text-center hidden">Пока пусто</p>
+  </div>
+
+  <div class="card p-5 mt-6">
+    <h2 class="font-bold mb-4">🎯 Компании-мечты <span class="text-gray-400 font-normal text-sm">— целевой трек</span></h2>
+    <div id="companies" class="grid md:grid-cols-2 gap-2"></div>
+  </div>
+
+  <p class="text-center text-gray-400 text-xs mt-6">Данные: Google Sheets CRM · обновление каждые 45 сек</p>
+</div>
+
+<script>
+// === Корректная статусная модель (воронка) ===
+const STATUS_META = {
+  "Новая":             { color:"#3b82f6", bg:"#dbeafe" },
+  "Отклик отправлен":  { color:"#f59e0b", bg:"#fef3c7" },
+  "Просмотрен":        { color:"#0ea5e9", bg:"#e0f2fe" },
+  "Переписка":         { color:"#8b5cf6", bg:"#ede9fe" },
+  "Собеседование":     { color:"#10b981", bg:"#d1fae5" },
+  "Оффер":             { color:"#059669", bg:"#d1fae5" },
+  "Отказ":             { color:"#ef4444", bg:"#fee2e2" },
+  "Неактуальна":       { color:"#9ca3af", bg:"#f3f4f6" },
+};
+// порядок воронки
+const ORDER = ["Новая","Отклик отправлен","Просмотрен","Переписка","Собеседование","Оффер","Отказ","Неактуальна"];
+function meta(s){ return STATUS_META[s] || { color:"#64748b", bg:"#f1f5f9" }; }
+
+let chart;
+async function load(){
+  const r = await fetch('/api/data'); const d = await r.json();
+  const items = d.items || [];
+  renderKPI(items); renderFunnel(items); renderChart(items); renderTable(items);
+  renderCompanies(d.companies || []);
+}
+
+function renderCompanies(list){
+  const el = document.getElementById('companies');
+  if(!list.length){ el.innerHTML = '<p class="text-gray-400 text-sm">Список пуст</p>'; return; }
+  el.innerHTML = list.map(c => {
+    const link = c.search ? `<a class="lnk text-xs" href="${c.search}" target="_blank" rel="noopener">вакансии ↗</a>` : '';
+    return `<div class="flex items-start justify-between gap-3 border-b border-gray-50 py-2">
+      <div>
+        <div class="font-semibold text-sm">${c.prio} ${c.name}</div>
+        <div class="text-xs text-gray-500">${c.category||''} ${c.why ? '· '+c.why : ''}</div>
+      </div>
+      <div class="whitespace-nowrap">${link}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderKPI(items){
+  const count = s => items.filter(i => i.status === s).length;
+  const active = items.filter(i => !["Отказ","Неактуальна"].includes(i.status)).length;
+  const kp = [
+    ["Всего", items.length, "#111827"],
+    ["Активные", active, "#2563eb"],
+    ["Собеседования", count("Собеседование"), "#10b981"],
+    ["Офферы", count("Оффер"), "#059669"],
+    ["Отказы", count("Отказ"), "#ef4444"],
+    ["Ждут ответа", count("Отклик отправлен")+count("Просмотрен"), "#f59e0b"],
+  ];
+  document.getElementById('kpis').innerHTML = kp.map(([label,val,col]) => `
+    <div class="card p-4">
+      <div class="text-xs text-gray-500 font-medium">${label}</div>
+      <div class="kpi-num text-3xl font-extrabold mt-1" style="color:${col}">${val}</div>
+    </div>`).join('');
+}
+
+function renderFunnel(items){
+  const counts = {};
+  items.forEach(i => counts[i.status] = (counts[i.status]||0)+1);
+  const statuses = ORDER.filter(s => counts[s]);
+  Object.keys(counts).forEach(s => { if(!statuses.includes(s)) statuses.push(s); });
+  const max = Math.max(1, ...Object.values(counts));
+  document.getElementById('funnel').innerHTML = statuses.map(s => {
+    const c = counts[s]; const pct = Math.round(c/max*100); const m = meta(s);
+    return `<div class="funnel-row">
+      <div style="width:150px;font-size:13px;font-weight:600">${s}</div>
+      <div class="flex-1 bg-gray-100 rounded" style="border-radius:6px">
+        <div class="funnel-bar" style="width:${pct}%;background:${m.color}"></div>
+      </div>
+      <div style="width:28px;text-align:right;font-weight:700;color:${m.color}">${c}</div>
+    </div>`;
+  }).join('') || '<p class="text-gray-400 text-sm">Нет данных</p>';
+}
+
+function renderChart(items){
+  const byDate = {};
+  items.forEach(i => { const d = i.date || "—"; byDate[d] = (byDate[d]||0)+1; });
+  const labels = Object.keys(byDate).slice(-14);
+  const data = labels.map(l => byDate[l]);
+  if(chart) chart.destroy();
+  chart = new Chart(document.getElementById('chart'), {
+    type:'bar',
+    data:{ labels, datasets:[{ data, backgroundColor:'#3b82f6', borderRadius:6 }] },
+    options:{ plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, ticks:{precision:0}} } }
+  });
+}
+
+function renderTable(items){
+  const tb = document.getElementById('rows');
+  const sorted = [...items].sort((a,b)=> (b.date||"").localeCompare(a.date||""));
+  tb.innerHTML = sorted.map(i => {
+    const m = meta(i.status);
+    const vac = i.url ? `<a class="lnk" href="${i.url}" target="_blank" rel="noopener">${i.vacancy||'—'}</a>` : (i.vacancy||'—');
+    return `<tr class="border-b border-gray-50 hover:bg-gray-50">
+      <td class="py-2 pr-3 text-gray-500 whitespace-nowrap">${i.date||''}</td>
+      <td class="py-2 pr-3 font-medium">${vac}</td>
+      <td class="py-2 pr-3">${i.company||''}</td>
+      <td class="py-2 pr-3"><span class="badge" style="color:${m.color};background:${m.bg}">${i.status}</span></td>
+      <td class="py-2 pr-3 font-semibold">${i.relevance||''}</td>
+      <td class="py-2 pr-3 text-gray-500 text-xs">${i.source||''}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('empty').classList.toggle('hidden', items.length>0);
+}
+load();
+setInterval(load, 45000);
+</script>
+</body>
+</html>

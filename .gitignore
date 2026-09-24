@@ -1,0 +1,37 @@
+# === Секреты (НИКОГДА не коммитить) ===
+.env
+*.env
+config.yaml
+config/*.json
+!config/role_matrix.example.json
+max_config.json
+hh_config.json
+
+# cookies / сессии
+*hhtoken*
+hhul*
+*cookies*.json
+*storage_state.json
+*_raw.json
+
+# === Служебное ===
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# === Логи и выгрузки ===
+*.log
+apply_log.txt
+apply_queue.json
+apply_counter.json
+max_state.json
+max_vacancies.json
+resumes_dump.json
+jobs_batch.json
+
+# === Медиа ===
+*.png
+*.jpg
+*.pdf

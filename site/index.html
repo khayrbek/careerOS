@@ -11,7 +11,8 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="https://unpkg.com/3d-force-graph@1.73.4/dist/3d-force-graph.min.js"></script>
 <style>
   :root{
     --bg:#0a0c0f; --bg2:#101317; --line:#1e242c; --ink:#eef2f6;
@@ -134,13 +135,16 @@
   <section>
     <div class="label">01 — Компетенции</div>
     <h2>Карта экспертизы</h2>
-    <p class="sub">Четыре связанных контура: домен HR-Tech, ИИ-практика, управление и инженерия.</p>
+    <p class="sub">Семь связанных контуров: домен HR-Tech, практика ИИ, управление продуктом и проектами, интеграции и архитектура, инженерия, change management. Наведи на узел — увидишь краткое описание; граф можно вращать.</p>
     <div id="graph"></div>
     <div class="legend">
       <span><i style="background:#4ade80"></i>HR-Tech домен</span>
       <span><i style="background:#38bdf8"></i>ИИ / LLM</span>
-      <span><i style="background:#f59e0b"></i>Управление</span>
-      <span><i style="background:#a78bfa"></i>Инженерия</span>
+      <span><i style="background:#fb7185"></i>Управление продуктами</span>
+      <span><i style="background:#f59e0b"></i>Управление проектами</span>
+      <span><i style="background:#60a5fa"></i>Интеграции и архитектура</span>
+      <span><i style="background:#a78bfa"></i>Инженерия и данные</span>
+      <span><i style="background:#f97316"></i>Change management</span>
     </div>
   </section>
 
@@ -238,71 +242,204 @@
 </div>
 
 <script>
-// === Граф компетенций (d3 force) ===
-const nodesData = [
-  {id:'Хайрбек', g:'core', r:17},
-  // HR-Tech
-  {id:'SAP HCM', g:'hr'},{id:'1С:ЗУП', g:'hr'},{id:'КЭДО', g:'hr'},
-  {id:'LMS', g:'hr'},{id:'ATS', g:'hr'},{id:'HR-портал', g:'hr'},
-  // AI
-  {id:'LLM', g:'ai'},{id:'RAG', g:'ai'},{id:'AI-агенты', g:'ai'},
-  {id:'prompt-инжиниринг', g:'ai'},{id:'function calling', g:'ai'},
-  // Management
-  {id:'управление проектами', g:'pm'},{id:'команды 40+', g:'pm'},
-  {id:'бюджеты 110 млн', g:'pm'},{id:'подрядчики', g:'pm'},{id:'ТЗ и требования', g:'pm'},
-  // Engineering
-  {id:'интеграции', g:'eng'},{id:'API', g:'eng'},{id:'архитектура', g:'eng'},
-  {id:'Python', g:'eng'},{id:'152-ФЗ', g:'eng'}
+// === Карта экспертизы (d3 force, кластеры по секторам) ===
+const clusters = [
+  {g:'hr',   label:'HR-Tech домен',        angle:-90,  color:'#4ade80'},
+  {g:'ai',   label:'ИИ / LLM',             angle:-39,  color:'#38bdf8'},
+  {g:'prod', label:'Управление продуктами', angle:12,   color:'#fb7185'},
+  {g:'pm',   label:'Управление проектами',  angle:63,   color:'#f59e0b'},
+  {g:'int',  label:'Интеграции и архитектура', angle:114, color:'#60a5fa'},
+  {g:'eng',  label:'Инженерия и данные',   angle:165,  color:'#a78bfa'},
+  {g:'chg',  label:'Change management',    angle:216,  color:'#f97316'},
 ];
-const colors = {core:'#4ade80', hr:'#4ade80', ai:'#38bdf8', pm:'#f59e0b', eng:'#a78bfa'};
-const links = nodesData.filter(d=>d.g!=='core').map(d=>({source:d.id, target:'Хайрбек'}));
-// внутренние связи контуров
-[['SAP HCM','1С:ЗУП'],['1С:ЗУП','КЭДО'],['КЭДО','HR-портал'],['LMS','ATS'],
- ['LLM','RAG'],['RAG','AI-агенты'],['AI-агенты','function calling'],['LLM','prompt-инжиниринг'],
- ['управление проектами','команды 40+'],['управление проектами','бюджеты 110 млн'],
- ['управление проектами','подрядчики'],['ТЗ и требования','управление проектами'],
- ['интеграции','API'],['API','архитектура'],['архитектура','152-ФЗ'],['Python','интеграции'],
- ['LLM','интеграции'],['КЭДО','152-ФЗ'],['RAG','архитектура']
-].forEach(([s,t])=>links.push({source:s,target:t}));
+const colors = {core:'#4ade80'};
+clusters.forEach(c => colors[c.g] = c.color);
 
+const nodesData = [
+  {id:'Хайрбек', g:'core', r:18},
+  // hubs
+  {id:'HR-системы', g:'hr', r:10, hub:1},
+  {id:'ИИ / LLM', g:'ai', r:10, hub:1},
+  {id:'Продукт', g:'prod', r:10, hub:1},
+  {id:'Проекты', g:'pm', r:10, hub:1},
+  {id:'Интеграции', g:'int', r:10, hub:1},
+  {id:'Инженерия', g:'eng', r:10, hub:1},
+  {id:'Изменения', g:'chg', r:10, hub:1},
+  // HR-Tech
+  {id:'SAP HCM', g:'hr'},{id:'1С:ЗУП', g:'hr'},{id:'КЭДО / HRLink', g:'hr'},
+  {id:'LMS Knomary', g:'hr'},{id:'ATS / Skillaz', g:'hr'},{id:'HR-портал', g:'hr'},
+  {id:'оргструктура', g:'hr'},{id:'HR-аналитика', g:'hr'},{id:'премирование и C&B', g:'hr'},
+  // ИИ
+  {id:'RAG', g:'ai'},{id:'AI-агенты', g:'ai'},{id:'мультиагентные системы', g:'ai'},
+  {id:'prompt-инжиниринг', g:'ai'},{id:'function calling', g:'ai'},{id:'контекстный инжиниринг', g:'ai'},
+  {id:'AI SDLC', g:'ai'},{id:'оценка качества AI', g:'ai'},{id:'GenAI-стратегия', g:'ai'},
+  // Продукт
+  {id:'roadmap и backlog', g:'prod'},{id:'MVP', g:'prod'},{id:'product-метрики', g:'prod'},
+  {id:'кастдевы / discovery', g:'prod'},{id:'unit-экономика', g:'prod'},{id:'CJM', g:'prod'},
+  {id:'приоритизация', g:'prod'},{id:'гипотезы и A/B', g:'prod'},
+  // Проекты
+  {id:'бюджеты до 110 млн', g:'pm'},{id:'команды 40+', g:'pm'},{id:'подрядчики и вендоры', g:'pm'},
+  {id:'ТЗ и требования', g:'pm'},{id:'управление рисками', g:'pm'},{id:'Agile / Scrum', g:'pm'},
+  {id:'Kanban', g:'pm'},{id:'Waterfall', g:'pm'},{id:'приёмка и запуск', g:'pm'},
+  // Интеграции
+  {id:'API / REST', g:'int'},{id:'ESB / шина данных', g:'int'},{id:'очереди и события', g:'int'},
+  {id:'микросервисы', g:'int'},{id:'интеграционные паттерны', g:'int'},{id:'ETL / обмен данными', g:'int'},
+  {id:'вебхуки', g:'int'},{id:'архитектура решений', g:'int'},
+  // Инженерия
+  {id:'Python', g:'eng'},{id:'Node.js', g:'eng'},{id:'SQL', g:'eng'},
+  {id:'BI / дашборды', g:'eng'},{id:'low-code', g:'eng'},{id:'1С-платформа', g:'eng'},
+  {id:'152-ФЗ', g:'eng'},{id:'ГОСТ 34', g:'eng'},{id:'ФСТЭК №21', g:'eng'},
+  // Change management
+  {id:'обучение и adoption', g:'chg'},{id:'коммуникации', g:'chg'},{id:'вовлечение стейкхолдеров', g:'chg'},
+  {id:'работа с сопротивлением', g:'chg'},{id:'регламенты', g:'chg'},{id:'поддержка пользователей', g:'chg'},
+];
+
+const links = [];
+// центр → хабы
+['HR-системы','ИИ / LLM','Продукт','Проекты','Интеграции','Инженерия','Изменения']
+  .forEach(h => links.push({source:'Хайрбек', target:h, hub:1}));
+// хабы → свои узлы (ключевые)
+const hubMap = {'hr':'HR-системы','ai':'ИИ / LLM','prod':'Продукт','pm':'Проекты','int':'Интеграции','eng':'Инженерия','chg':'Изменения'};
+nodesData.filter(d => d.g !== 'core' && !d.hub).forEach(d => {
+  links.push({source:hubMap[d.g], target:d.id, leaf:1});
+  links.push({source:'Хайрбек', target:d.id, faint:1});
+});
+// межконтурные связи
+[['ИИ / LLM','HR-системы'],['Продукт','Проекты'],['Интеграции','Инженерия'],
+ ['Изменения','Проекты'],['Продукт','ИИ / LLM'],['Интеграции','HR-системы']
+].forEach(([s,t]) => links.push({source:s, target:t, cross:1}));
+
+// === Краткие описания узлов ===
+const DESCS = {
+  'Хайрбек':'HR-Tech × ИИ · 14 лет в цифровой трансформации',
+  'HR-системы':'Контур HR-Tech: системы и продукты для управления персоналом',
+  'ИИ / LLM':'Практика применения больших языковых моделей и агентов',
+  'Продукт':'Управление продуктом: от потребности до метрик',
+  'Проекты':'Управление проектами и командами полного цикла',
+  'Интеграции':'Интеграции и архитектура корпоративных систем',
+  'Инженерия':'Инженерная база, данные и требования ИБ',
+  'Изменения':'Change management: внедрение и принятие изменений',
+  'SAP HCM':'10 лет: консалтинг и развитие SAP HR в крупных холдингах',
+  '1С:ЗУП':'Переход с SAP HCM на 1С:ЗУП: бюджет >110 млн ₽, «проект года»',
+  'КЭДО / HRLink':'Внедрил КЭДО: 60% кадровых документов в электронном виде',
+  'LMS Knomary':'Перевёл обучение 70 000+ сотрудников с SAP LSO',
+  'ATS / Skillaz':'Автоматизация подбора: приём ×2 быстрее, ошибки −14%',
+  'HR-портал':'Единое окно HR-сервисов для 80% персонала',
+  'оргструктура':'Единый источник оргструктуры группы компаний',
+  'HR-аналитика':'Дашборды и метрики по персоналу',
+  'премирование и C&B':'5 500 сотрудников: расчёт ×3 быстрее, ошибки −30%',
+  'RAG':'Поиск по корпоративным данным для ответов LLM',
+  'AI-агенты':'Автономные агенты с доступом к инструментам',
+  'мультиагентные системы':'Оркестрация нескольких агентов для сложных задач',
+  'prompt-инжиниринг':'Проектирование промптов и оценка результатов',
+  'function calling':'Вызов внешних функций и API из модели',
+  'контекстный инжиниринг':'Управление контекстом и памятью модели',
+  'AI SDLC':'AI-assisted разработка: LLM в жизненном цикле ПО',
+  'оценка качества AI':'Метрики, evals, борьба с галлюцинациями',
+  'GenAI-стратегия':'Выбор ИИ-сценариев с измеримым эффектом',
+  'roadmap и backlog':'Формирование и приоритизация бэклога продукта',
+  'MVP':'Минимально жизнеспособный продукт',
+  'product-метрики':'Воронки, конверсии, retention',
+  'кастдевы / discovery':'Интервью с пользователями, проверка потребностей',
+  'unit-экономика':'Стоимость и эффект решений',
+  'CJM':'Карта пути пользователя',
+  'приоритизация':'RICE / ICE: что делать первым',
+  'гипотезы и A/B':'Проверка гипотез на данных',
+  'бюджеты до 110 млн':'Управление бюджетом крупных программ',
+  'команды 40+':'Кросс-функциональные команды и подрядчики',
+  'подрядчики и вендоры':'Выбор, ТЗ, контроль сроков, приёмка',
+  'ТЗ и требования':'Сбор и формализация требований',
+  'управление рисками':'Выявление, оценка, план реагирования',
+  'Agile / Scrum':'Спринты, бэклог, ретроспективы',
+  'Kanban':'Поток задач и WIP-лимиты',
+  'Waterfall':'Этапные внедрения с приёмками',
+  'приёмка и запуск':'Тестирование → промышленная эксплуатация',
+  'API / REST':'Проектирование и интеграция REST-сервисов',
+  'ESB / шина данных':'Корпоративная сервисная шина',
+  'очереди и события':'Асинхронный обмен (Kafka, RabbitMQ)',
+  'микросервисы':'Декомпозиция систем на сервисы',
+  'интеграционные паттерны':'Идемпотентность, retry, circuit breaker',
+  'ETL / обмен данными':'Загрузка и обмен корпоративными данными',
+  'вебхуки':'Событийные уведомления между системами',
+  'архитектура решений':'Целевая архитектура и ИТ-ландшафт',
+  'Python':'Скрипты, автоматизация, AI-агенты',
+  'Node.js':'Сервисы, боты, интеграции',
+  'SQL':'Запросы и аналитика данных',
+  'BI / дашборды':'Визуализация метрик и KPI',
+  'low-code':'Быстрые решения без полной разработки',
+  '1С-платформа':'Конфигурация, интеграции, миграции',
+  '152-ФЗ':'Персональные данные: требования и практика',
+  'ГОСТ 34':'Стандарты создания автоматизированных систем',
+  'ФСТЭК №21':'Меры защиты информации в информационных системах',
+  'обучение и adoption':'Обучение и вовлечение пользователей',
+  'коммуникации':'Коммуникационная поддержка изменений',
+  'вовлечение стейкхолдеров':'Работа с заинтересованными сторонами',
+  'работа с сопротивлением':'Адресная работа с барьерами',
+  'регламенты':'Инструкции и регламенты процессов',
+  'поддержка пользователей':'Поддержка после запуска (2-я линия)',
+};
+
+// === 3D-граф (вращаемый шар + описания при наведении) ===
 const el = document.getElementById('graph');
-const W = el.clientWidth, H = el.clientHeight;
-const svg = d3.select('#graph').append('svg')
-  .attr('viewBox', `0 0 ${W} ${H}`).attr('width','100%').attr('height','100%');
+el.innerHTML = '';
+const gdata = {
+  nodes: nodesData.map(d => ({id: d.id, g: d.g, r: d.r || 6, hub: d.hub || 0})),
+  links: links.map(l => ({source: (l.source.id || l.source), target: (l.target.id || l.target),
+                          kind: l.hub ? 'hub' : (l.cross ? 'cross' : 'leaf')}))
+};
+const meta = {};
+nodesData.forEach(d => meta[d.id] = d);
 
-const g = svg.append('g');
-svg.call(d3.zoom().scaleExtent([.6,2.2]).on('zoom', e => g.attr('transform', e.transform)));
+const Graph = ForceGraph3D({ rendererConfig: { antialias: true, alpha: true } })(el)
+  .backgroundColor('rgba(0,0,0,0)')
+  .graphData(gdata)
+  .nodeVal(d => d.g === 'core' ? 40 : (d.hub ? 14 : 6))
+  .nodeColor(d => colors[d.g] || '#8b96a5')
+  .nodeOpacity(0.92)
+  .nodeResolution(16)
+  .linkColor(l => l.kind === 'hub' ? 'rgba(255,255,255,.30)' : (l.kind === 'cross' ? 'rgba(255,255,255,.13)' : 'rgba(255,255,255,.06)'))
+  .linkWidth(l => l.kind === 'hub' ? 1.5 : (l.kind === 'cross' ? 0.9 : 0.4))
+  .linkOpacity(0.85)
+  .nodeLabel(d => `<div style="max-width:280px; padding:10px 12px; background:#12161b; border:1px solid #2a323d;
+        border-radius:10px; box-shadow:0 8px 28px rgba(0,0,0,.55); font-family:Inter,sans-serif">
+      <div style="font:600 13.5px/1.3 Inter,sans-serif; color:${colors[d.g] || '#eef1f5'}; margin-bottom:4px">${d.id}</div>
+      <div style="font:12px/1.45 Inter,sans-serif; color:#a8b3c1">${DESCS[d.id] || ''}</div>
+    </div>`)
+  .d3AlphaDecay(0.021)
+  .d3VelocityDecay(0.34)
+  .warmupTicks(60);
 
-const link = g.selectAll('line').data(links).join('line')
-  .attr('stroke','#252c35').attr('stroke-width',1);
+// подписи узлов (спрайты)
+const mkSprite = (txt, color, big) => {
+  const c = document.createElement('canvas');
+  const ctx = c.getContext('2d');
+  c.width = 512; c.height = 80;
+  ctx.font = `600 ${big ? 38 : 32}px "JetBrains Mono", monospace`;
+  ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(txt, 256, 40);
+  const tex = new THREE.CanvasTexture(c);
+  tex.minFilter = THREE.LinearFilter;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+  const w = big ? 44 : 30;
+  sp.scale.set(w, w * (80 / 512), 1);
+  return sp;
+};
+Graph.nodeThreeObject(d => mkSprite(d.id, d.g === 'core' ? '#eef1f5' : (colors[d.g] || '#8b97a6'), d.g === 'core' || d.hub));
 
-const node = g.selectAll('g.nd').data(nodesData).join('g').attr('class','nd');
-node.append('circle')
-  .attr('r', d => d.r || (d.g==='ai'?7:6))
-  .attr('fill', d => d.g==='core' ? '#4ade80' : colors[d.g]+'22')
-  .attr('stroke', d => colors[d.g]).attr('stroke-width', d=>d.g==='core'?2:1.5);
-node.append('text')
-  .text(d=>d.id).attr('x', 0).attr('y', d=>(d.r||6)+14)
-  .attr('text-anchor','middle')
-  .attr('fill', d=>d.g==='core'?'#eef2f6':'#8b97a6')
-  .attr('font-size', d=>d.g==='core'?12:10.5)
-  .attr('font-family','JetBrains Mono, monospace');
+// вращение шара
+const ctr = Graph.controls();
+ctr.autoRotate = true;
+ctr.autoRotateSpeed = 0.6;
+ctr.enableDamping = true;
+ctr.dampingFactor = 0.08;
+ctr.minDistance = 130;
+ctr.maxDistance = 800;
+el.addEventListener('pointerdown', () => { ctr.autoRotate = false; });
+el.addEventListener('pointerup', () => { setTimeout(() => { ctr.autoRotate = true; }, 4000); });
 
-const sim = d3.forceSimulation(nodesData)
-  .force('link', d3.forceLink(links).id(d=>d.id).distance(d=>d.target==='Хайрбек'?150:110).strength(.35))
-  .force('charge', d3.forceManyBody().strength(-620))
-  .force('center', d3.forceCenter(W/2, H/2))
-  .force('collide', d3.forceCollide().radius(d=>(d.r||7)+42))
-  .on('tick', () => {
-    link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y)
-        .attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
-    node.attr('transform', d=>`translate(${d.x},${d.y})`);
-  });
-
-node.call(d3.drag()
-  .on('start',(e,d)=>{if(!e.active)sim.alphaTarget(.25).restart();d.fx=d.x;d.fy=d.y})
-  .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y})
-  .on('end',(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null}));
+// подгоняем масштаб под контейнер
+setTimeout(() => { Graph.zoomToFit(600, 70); }, 1600);
+window.addEventListener('resize', () => Graph.zoomToFit(600, 70));
 </script>
 </body>
 </html>

@@ -73,11 +73,28 @@
 
 - **Язык:** Python 3.11
 - **Автоматизация браузера:** Playwright (Chromium, headless)
-- **LLM:** YandexGPT-5-pro, GPT-OSS-120B (OpenAI-совместимый API)
+- **LLM (мультиагентность / MoA):** GPT-6-sol (флагман, агрегатор), GPT-5.6-terra, DeepSeek-V4-Flash, YandexGPT-5-pro, GigaChat-3-Ultra
 - **Данные:** Google Sheets API (CRM), JSON-буферы
-- **Дашборд:** Python http.server + HTML/Tailwind/Chart.js
+- **Дашборд:** Python http.server + HTML/Tailwind/Chart.js (+ страница «О продукте» `/about`)
 - **Оркестрация:** cron (расписания), guardrails (лимиты/паузы)
-- **Интеграции:** hh.ru (веб), MAX Bot API, Telegram, Google Workspace
+- **Интеграции:** hh.ru (веб), MAX Bot API, Telegram, Сетка, Google Workspace
+
+## Мультиагентная модель (MoA)
+
+Под капотом — «совет моделей» (Mixture of Agents): несколько LLM отвечают параллельно,
+флагман синтезирует итоговый ответ.
+
+```
+вопрос
+  ├─► GPT-5.6-terra
+  ├─► DeepSeek-V4-Flash
+  ├─► YandexGPT-5-pro   ──►  GPT-6-sol (агрегатор)  ──►  ответ
+  └─► GigaChat-3-Ultra
+```
+
+- **Reference-модели** — быстрые и разные по «школе», дают разные углы зрения
+- **Aggregator (gpt-6-sol)** — флагман, синтезирует лучшее из черновиков
+- Рутина — на быстрых моделях; сложное (стратегия, разбор вакансий) — через `/moa`
 
 ## Ключевые инженерные решения
 

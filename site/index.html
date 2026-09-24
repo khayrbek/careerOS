@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Хайрбек Ажимов — HR-Tech × AI</title>
+<meta name="description" content="Хайрбек Ажимов — эксперт HR-Tech с 14-летним опытом, внедряю ИИ-решения в корпоративные системы.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<style>
+  :root{
+    --bg:#0a0c0f; --bg2:#101317; --line:#1e242c; --ink:#eef2f6;
+    --muted:#8b97a6; --accent:#4ade80; --accent-dim:#1c3a29;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'JetBrains Mono',monospace}
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif; margin:0; letter-spacing:-.02em}
+  a{color:inherit}
+  .wrap{max-width:1120px; margin:0 auto; padding:0 24px}
+
+  /* === HERO === */
+  .hero{display:grid; grid-template-columns:1.25fr .75fr; gap:56px; align-items:center;
+        padding:88px 0 72px; border-bottom:1px solid var(--line)}
+  .status{display:inline-flex; align-items:center; gap:8px; font-size:12.5px; color:var(--accent);
+          border:1px solid var(--accent-dim); background:rgba(74,222,128,.06);
+          padding:5px 12px; border-radius:999px; margin-bottom:22px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .hero h1{font-size:clamp(34px,5vw,54px); font-weight:700; line-height:1.08}
+  .hero h1 em{font-style:normal; color:var(--accent)}
+  .hero .lead{font-size:17.5px; color:var(--muted); margin-top:20px; max-width:560px; text-wrap:pretty}
+  .facts{display:flex; flex-wrap:wrap; gap:28px; margin-top:34px}
+  .fact b{display:block; font-family:'Space Grotesk'; font-size:26px; color:var(--ink)}
+  .fact span{font-size:12.5px; color:var(--muted)}
+  .cta{display:flex; gap:12px; flex-wrap:wrap; margin-top:34px}
+  .btn{padding:12px 20px; border-radius:10px; font-size:14.5px; font-weight:600; text-decoration:none;
+       border:1px solid var(--line); transition:.18s; display:inline-block}
+  .btn.primary{background:var(--accent); color:#04160c; border-color:var(--accent)}
+  .btn.primary:hover{filter:brightness(1.08)}
+  .btn.ghost:hover{border-color:var(--accent); color:var(--accent)}
+  .photo-wrap{position:relative; display:flex; justify-content:center}
+  .photo{width:100%; max-width:300px; border-radius:18px; border:1px solid var(--line);
+         filter:contrast(1.05); display:block}
+  .photo-wrap::after{content:''; position:absolute; inset:auto 12% -14px 12%; height:28px;
+         background:radial-gradient(ellipse at center, rgba(74,222,128,.22), transparent 70%); filter:blur(12px)}
+
+  /* === SECTIONS === */
+  section{padding:64px 0; border-bottom:1px solid var(--line)}
+  .label{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+         font-family:'JetBrains Mono'; margin-bottom:26px}
+  h2{font-size:clamp(24px,3vw,32px); font-weight:700; margin-bottom:12px}
+  .sub{color:var(--muted); max-width:640px; margin-bottom:36px; text-wrap:pretty}
+
+  /* === SKILLS GRAPH === */
+  #graph{width:100%; height:580px; border:1px solid var(--line); border-radius:16px; background:var(--bg2)}
+  .legend{display:flex; gap:22px; flex-wrap:wrap; margin-top:18px; font-size:13px; color:var(--muted)}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px}
+
+  /* === CASES === */
+  .cases{display:grid; grid-template-columns:repeat(2,1fr); gap:16px}
+  .case{border:1px solid var(--line); border-radius:14px; padding:22px; background:var(--bg2)}
+  .case h3{font-size:16.5px; margin-bottom:8px}
+  .case p{margin:0; color:var(--muted); font-size:14.5px}
+  .case b{color:var(--accent); font-weight:600}
+  .case .metric{font-family:'Space Grotesk'; font-size:22px; color:var(--ink); margin-top:14px; display:block}
+
+  /* === STACK === */
+  .stack{display:flex; flex-wrap:wrap; gap:9px}
+  .tag{border:1px solid var(--line); border-radius:999px; padding:6px 14px; font-size:13.5px;
+       color:var(--muted); font-family:'JetBrains Mono'}
+  .tag:hover{border-color:var(--accent); color:var(--accent)}
+
+  /* === PROJECT === */
+  .proj{display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:center}
+  .proj ul{margin:0; padding-left:18px; color:var(--muted); font-size:14.5px}
+  .proj li{margin-bottom:7px}
+
+  /* === CONTACT === */
+  .contact{display:flex; flex-wrap:wrap; gap:14px; margin-top:8px}
+  footer{padding:36px 0 56px; color:var(--muted); font-size:13px}
+  @media(max-width:860px){
+    .hero{grid-template-columns:1fr; gap:40px; padding:56px 0}
+    .photo-wrap{order:-1; justify-content:flex-start}
+    .photo{max-width:210px}
+    .cases,.proj{grid-template-columns:1fr}
+    #graph{height:440px}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div>
+      <span class="status"><span class="dot"></span>Открыт к предложениям · Москва / гибрид</span>
+      <h1>Хайрбек Ажимов<br><em>HR-Tech × AI</em></h1>
+      <p class="lead">
+        14 лет строю корпоративные HR-системы и внедряю ИИ в реальные бизнес-процессы.
+        Веду проекты полного цикла — от требований и ТЗ до промышленной эксплуатации.
+      </p>
+      <div class="facts">
+        <div class="fact"><b>14</b><span>лет в HR IT</span></div>
+        <div class="fact"><b>70 000+</b><span>сотрудников — LMS</span></div>
+        <div class="fact"><b>110 млн ₽</b><span>бюджет проектов</span></div>
+        <div class="fact"><b>3</b><span>AI-решения в проде</span></div>
+      </div>
+      <div class="cta">
+        <a class="btn primary" href="tg://resolve?domain=khayrbek">Написать в Telegram</a>
+        <a class="btn ghost" href="/dash/">Живой дашборд проекта</a>
+        <a class="btn ghost" href="https://github.com/khayrbek/careerOS" target="_blank" rel="noopener">careerOS на GitHub</a>
+      </div>
+    </div>
+    <div class="photo-wrap">
+      <img class="photo" src="photo.jpg" alt="Хайрбек Ажимов" width="300" height="300">
+    </div>
+  </header>
+
+  <!-- SKILLS GRAPH -->
+  <section>
+    <div class="label">01 — Компетенции</div>
+    <h2>Карта экспертизы</h2>
+    <p class="sub">Четыре связанных контура: домен HR-Tech, ИИ-практика, управление и инженерия.</p>
+    <div id="graph"></div>
+    <div class="legend">
+      <span><i style="background:#4ade80"></i>HR-Tech домен</span>
+      <span><i style="background:#38bdf8"></i>ИИ / LLM</span>
+      <span><i style="background:#f59e0b"></i>Управление</span>
+      <span><i style="background:#a78bfa"></i>Инженерия</span>
+    </div>
+  </section>
+
+  <!-- CASES -->
+  <section>
+    <div class="label">02 — Результаты</div>
+    <h2>Что сделано</h2>
+    <p class="sub">Кейсы с измеримым эффектом — не «участвовал», а «сделал и вот цифры».</p>
+    <div class="cases">
+      <div class="case">
+        <h3>Миграция SAP HCM → 1С ЗУП</h3>
+        <p>Перевод кадрового контура на новую платформу: 2 подрядчика, распределённая команда.</p>
+        <span class="metric">110 млн ₽ · «проект года»</span>
+      </div>
+      <div class="case">
+        <h3>LMS Knomary</h3>
+        <p>Корпоративная платформа обучения: внедрение и развитие, интеграции, масштабирование.</p>
+        <span class="metric">70 000+ сотрудников</span>
+      </div>
+      <div class="case">
+        <h3>КЭДО на HR-link</h3>
+        <p>Переход на электронный кадровый документооборот и цифровые HR-сервисы.</p>
+        <span class="metric">60% документов в ЭДО · 80% персонала</span>
+      </div>
+      <div class="case">
+        <h3>Автоматизация рекрутинга</h3>
+        <p>Внедрение системы подбора: ускорение проверки кандидатов и приёма.</p>
+        <span class="metric">приём ×2 · ошибки −14%</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECT -->
+  <section>
+    <div class="label">03 — Пет-проект</div>
+    <h2>careerOS</h2>
+    <div class="proj">
+      <div>
+        <p class="sub" style="margin-bottom:20px">
+          Собственная AI-система поиска работы: от сбора вакансий до авто-откликов
+          с письмами от LLM. Показывает, как я проектирую и довожу до прода
+          агентные пайплайны.
+        </p>
+        <ul>
+          <li>3 источника: hh.ru, Telegram, MAX</li>
+          <li>Скоринг релевантности и подбор резюме</li>
+          <li>LLM-генерация писем под требования вакансии</li>
+          <li>Playwright-автоматизация с guardrails</li>
+          <li>CRM + веб-дашборд с воронкой и KPI</li>
+        </ul>
+        <div class="cta">
+          <a class="btn primary" href="/dash/">Открыть дашборд</a>
+          <a class="btn ghost" href="https://github.com/khayrbek/careerOS" target="_blank" rel="noopener">Код на GitHub</a>
+        </div>
+      </div>
+      <div>
+        <img src="/dash-shot.png" alt="Дашборд careerOS" style="width:100%;border:1px solid var(--line);border-radius:14px" onerror="this.style.display='none'">
+      </div>
+    </div>
+  </section>
+
+  <!-- STACK -->
+  <section>
+    <div class="label">04 — Стек</div>
+    <h2>Инструменты</h2>
+    <div class="stack">
+      <span class="tag">SAP HCM</span><span class="tag">1С:ЗУП</span><span class="tag">КЭДО</span>
+      <span class="tag">LMS</span><span class="tag">ATS</span><span class="tag">HR Portal</span>
+      <span class="tag">LLM</span><span class="tag">RAG</span><span class="tag">AI-агенты</span>
+      <span class="tag">prompt engineering</span><span class="tag">function calling</span>
+      <span class="tag">Python</span><span class="tag">Node.js</span><span class="tag">REST API</span>
+      <span class="tag">Playwright</span><span class="tag">SQL</span><span class="tag">Jira / Confluence</span>
+      <span class="tag">152-ФЗ</span><span class="tag">BPMN</span><span class="tag">Archimate</span>
+      <span class="tag">Agile / Scrum / Kanban</span><span class="tag">управление подрядчиками</span>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section style="border-bottom:none">
+    <div class="label">05 — Контакты</div>
+    <h2>Давайте обсудим</h2>
+    <p class="sub">Открыт к ролям: руководитель ИИ-направления, AI-продукты, HR-Tech (руководитель проектов / продукта).</p>
+    <div class="contact">
+      <a class="btn primary" href="tg://resolve?domain=khayrbek">Telegram @khayrbek</a>
+      <a class="btn ghost" href="tel:+79253560809">+7 925 356-08-09</a>
+      <a class="btn ghost" href="https://github.com/khayrbek" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </section>
+
+  <footer>
+    Хайрбек Ажимов · careerOS · 2026
+  </footer>
+</div>
+
+<script>
+// === Граф компетенций (d3 force) ===
+const nodesData = [
+  {id:'Хайрбек', g:'core', r:17},
+  // HR-Tech
+  {id:'SAP HCM', g:'hr'},{id:'1С:ЗУП', g:'hr'},{id:'КЭДО', g:'hr'},
+  {id:'LMS', g:'hr'},{id:'ATS', g:'hr'},{id:'HR-портал', g:'hr'},
+  // AI
+  {id:'LLM', g:'ai'},{id:'RAG', g:'ai'},{id:'AI-агенты', g:'ai'},
+  {id:'prompt-инжиниринг', g:'ai'},{id:'function calling', g:'ai'},
+  // Management
+  {id:'управление проектами', g:'pm'},{id:'команды 40+', g:'pm'},
+  {id:'бюджеты 110 млн', g:'pm'},{id:'подрядчики', g:'pm'},{id:'ТЗ и требования', g:'pm'},
+  // Engineering
+  {id:'интеграции', g:'eng'},{id:'API', g:'eng'},{id:'архитектура', g:'eng'},
+  {id:'Python', g:'eng'},{id:'152-ФЗ', g:'eng'}
+];
+const colors = {core:'#4ade80', hr:'#4ade80', ai:'#38bdf8', pm:'#f59e0b', eng:'#a78bfa'};
+const links = nodesData.filter(d=>d.g!=='core').map(d=>({source:d.id, target:'Хайрбек'}));
+// внутренние связи контуров
+[['SAP HCM','1С:ЗУП'],['1С:ЗУП','КЭДО'],['КЭДО','HR-портал'],['LMS','ATS'],
+ ['LLM','RAG'],['RAG','AI-агенты'],['AI-агенты','function calling'],['LLM','prompt-инжиниринг'],
+ ['управление проектами','команды 40+'],['управление проектами','бюджеты 110 млн'],
+ ['управление проектами','подрядчики'],['ТЗ и требования','управление проектами'],
+ ['интеграции','API'],['API','архитектура'],['архитектура','152-ФЗ'],['Python','интеграции'],
+ ['LLM','интеграции'],['КЭДО','152-ФЗ'],['RAG','архитектура']
+].forEach(([s,t])=>links.push({source:s,target:t}));
+
+const el = document.getElementById('graph');
+const W = el.clientWidth, H = el.clientHeight;
+const svg = d3.select('#graph').append('svg')
+  .attr('viewBox', `0 0 ${W} ${H}`).attr('width','100%').attr('height','100%');
+
+const g = svg.append('g');
+svg.call(d3.zoom().scaleExtent([.6,2.2]).on('zoom', e => g.attr('transform', e.transform)));
+
+const link = g.selectAll('line').data(links).join('line')
+  .attr('stroke','#252c35').attr('stroke-width',1);
+
+const node = g.selectAll('g.nd').data(nodesData).join('g').attr('class','nd');
+node.append('circle')
+  .attr('r', d => d.r || (d.g==='ai'?7:6))
+  .attr('fill', d => d.g==='core' ? '#4ade80' : colors[d.g]+'22')
+  .attr('stroke', d => colors[d.g]).attr('stroke-width', d=>d.g==='core'?2:1.5);
+node.append('text')
+  .text(d=>d.id).attr('x', 0).attr('y', d=>(d.r||6)+14)
+  .attr('text-anchor','middle')
+  .attr('fill', d=>d.g==='core'?'#eef2f6':'#8b97a6')
+  .attr('font-size', d=>d.g==='core'?12:10.5)
+  .attr('font-family','JetBrains Mono, monospace');
+
+const sim = d3.forceSimulation(nodesData)
+  .force('link', d3.forceLink(links).id(d=>d.id).distance(d=>d.target==='Хайрбек'?150:110).strength(.35))
+  .force('charge', d3.forceManyBody().strength(-620))
+  .force('center', d3.forceCenter(W/2, H/2))
+  .force('collide', d3.forceCollide().radius(d=>(d.r||7)+42))
+  .on('tick', () => {
+    link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y)
+        .attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+    node.attr('transform', d=>`translate(${d.x},${d.y})`);
+  });
+
+node.call(d3.drag()
+  .on('start',(e,d)=>{if(!e.active)sim.alphaTarget(.25).restart();d.fx=d.x;d.fy=d.y})
+  .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y})
+  .on('end',(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null}));
+</script>
+</body>
+</html>

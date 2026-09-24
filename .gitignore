@@ -37,4 +37,7 @@ jobs_batch.json
 *.pdf
 !docs/*.png
 !docs/*.svg
+!site/*.png
+!site/*.jpg
+!site/*.ico
 

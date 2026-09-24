@@ -11,8 +11,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-<script src="https://unpkg.com/3d-force-graph@1.73.4/dist/3d-force-graph.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <style>
   :root{
     --bg:#0a0c0f; --bg2:#101317; --line:#1e242c; --ink:#eef2f6;
@@ -379,115 +378,92 @@ const DESCS = {
   'поддержка пользователей':'Поддержка после запуска (2-я линия)',
 };
 
-// === 3D-граф (вращаемый шар + описания при наведении) ===
+// === Граф экспертизы в стиле Obsidian (органичная сетка + подписи всех узлов) ===
 const el = document.getElementById('graph');
 el.innerHTML = '';
 
-// --- раскладка «шар»: хабы по сфере (Фибоначчи), листья вокруг хаба ---
-const R = 140;
-const fibPoint = (i, n, r) => {
-  const phi = Math.acos(1 - 2 * (i + 0.5) / n);
-  const theta = Math.PI * (1 + Math.sqrt(5)) * (i + 0.5);
-  return [r * Math.cos(theta) * Math.sin(phi), r * Math.cos(phi), r * Math.sin(theta) * Math.sin(phi)];
-};
-let seed = 7;
-const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
-
-const nodesG = [{ id: 'Хайрбек', g: 'core', fx: 0, fy: 0, fz: 0 }];
+const nodesG = [{ id: 'Хайрбек', g: 'core', hub: 1 }];
 const linksG = [];
-const N = clusters.length;
-clusters.forEach((cl, ci) => {
+clusters.forEach(cl => {
   const hubId = hubMap[cl.g];
-  const [hx, hy, hz] = fibPoint(ci, N, R);
-  nodesG.push({ id: hubId, g: cl.g, hub: 1, fx: hx, fy: hy, fz: hz });
-  linksG.push({ source: 'Хайрбек', target: hubId, kind: 'hub' });
-  const items = nodesData.filter(d => d.g === cl.g && !d.hub);
-  items.forEach((it, k) => {
-    const a = (k / items.length) * Math.PI * 2 + ci;
-    const rr = 34 + rnd() * 26;
-    let x = hx + Math.cos(a) * rr + (rnd() - 0.5) * 22;
-    let y = hy + (rnd() - 0.5) * 46 + Math.sin(a) * rr * 0.55;
-    let z = hz + Math.sin(a) * rr + (rnd() - 0.5) * 22;
-    const L = Math.hypot(x, y, z) || 1;
-    const Rn = R * (0.66 + rnd() * 0.34);
-    x = x / L * Rn; y = y / L * Rn; z = z / L * Rn;
-    nodesG.push({ id: it.id, g: cl.g, fx: x, fy: y, fz: z });
-    linksG.push({ source: hubId, target: it.id, kind: 'leaf' });
+  nodesG.push({ id: hubId, g: cl.g, hub: 1 });
+  linksG.push({ source: 'Хайрбек', target: hubId });
+  nodesData.filter(d => d.g === cl.g && !d.hub).forEach(it => {
+    nodesG.push({ id: it.id, g: cl.g });
+    linksG.push({ source: hubId, target: it.id });
   });
 });
-// межконтурные связи (сшивают шар)
-[['HR-системы','ИИ / LLM'],['Продукт','Проекты'],
- ['Интеграции','Инженерия'],['ИИ / LLM','Инженерия'],
- ['Изменения','Проекты']].forEach(([a, b]) => {
-  linksG.push({ source: a, target: b, kind: 'cross' });
-});
 
-const gdata = { nodes: nodesG, links: linksG };
-const meta = {};
-nodesData.forEach(d => meta[d.id] = d);
+const W = el.clientWidth || 900, H = el.clientHeight || 540;
+const PAD = 60;
+const svg = d3.select('#graph').append('svg')
+  .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', '100%');
 
-const Graph = ForceGraph3D({ rendererConfig: { antialias: true, alpha: true } })(el)
-  .width(el.clientWidth)
-  .height(el.clientHeight)
-  .backgroundColor('rgba(0,0,0,0)')
-  .graphData(gdata)
-  .nodeVal(d => d.g === 'core' ? 34 : (d.hub ? 12 : 5))
-  .nodeColor(d => colors[d.g] || '#8b96a5')
-  .nodeOpacity(0.95)
-  .nodeResolution(18)
-  .linkColor(l => l.kind === 'hub' ? 'rgba(255,255,255,.22)' : (l.kind === 'cross' ? 'rgba(255,255,255,.08)' : 'rgba(255,255,255,.025)'))
-  .linkWidth(l => l.kind === 'hub' ? 1.2 : (l.kind === 'cross' ? 0.5 : 0.18))
-  .linkOpacity(0.9)
-  .nodeLabel(d => `<div style="max-width:280px; padding:10px 12px; background:#12161b; border:1px solid #2a323d;
-        border-radius:10px; box-shadow:0 8px 28px rgba(0,0,0,.55); font-family:Inter,sans-serif">
-      <div style="font:600 13.5px/1.3 Inter,sans-serif; color:${colors[d.g] || '#eef1f5'}; margin-bottom:4px">${d.id}</div>
-      <div style="font:12px/1.45 Inter,sans-serif; color:#a8b3c1">${DESCS[d.id] || ''}</div>
-    </div>`)
-  .d3AlphaDecay(0.021)
-  .d3VelocityDecay(0.36)
-  .warmupTicks(80);
+const defs = svg.append('defs');
+const flt = defs.append('filter').attr('id', 'glow')
+  .attr('x', '-70%').attr('y', '-70%').attr('width', '240%').attr('height', '240%');
+flt.append('feGaussianBlur').attr('stdDeviation', '3.4').attr('result', 'b');
+const fmg = flt.append('feMerge');
+fmg.append('feMergeNode').attr('in', 'b');
+fmg.append('feMergeNode').attr('in', 'SourceGraphic');
 
-// шар статичен (узлы зафиксированы) — вращается камерой
-Graph.cooldownTicks(0);
+const gRoot = svg.append('g');
+svg.call(d3.zoom().scaleExtent([0.35, 4]).on('zoom', ev => gRoot.attr('transform', ev.transform)));
 
-// подписи узлов (спрайты)
-const mkSprite = (txt, color, big) => {
-  const c = document.createElement('canvas');
-  const ctx = c.getContext('2d');
-  c.width = 512; c.height = 80;
-  ctx.font = `600 ${big ? 38 : 32}px "JetBrains Mono", monospace`;
-  ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(txt, 256, 40);
-  const tex = new THREE.CanvasTexture(c);
-  tex.minFilter = THREE.LinearFilter;
-  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
-  const w = big ? 230 : 165;
-  sp.scale.set(w, w * (80 / 512), 1);
-  sp.position.set(0, 13, 0);
-  return sp;
-};
-Graph.nodeThreeObject(d => {
-  // подписи — только для центра и хабов; у листьев описание по наведению
-  if (d.id === 'Хайрбек') return mkSprite('Хайрбек Ажимов', '#eef1f5', true);
-  if (d.hub) return mkSprite(d.id, colors[d.g] || '#8b96a5', false);
-  return null;
-});
+const link = gRoot.append('g').selectAll('line').data(linksG).join('line')
+  .attr('stroke', '#8b96a5').attr('stroke-opacity', 0.15).attr('stroke-width', 1);
 
-// вращение шара
-const ctr = Graph.controls();
-ctr.autoRotate = true;
-ctr.autoRotateSpeed = 0.6;
-ctr.enableDamping = true;
-ctr.dampingFactor = 0.08;
-ctr.minDistance = 170;
-ctr.maxDistance = 1400;
-el.addEventListener('pointerdown', () => { ctr.autoRotate = false; });
-el.addEventListener('pointerup', () => { setTimeout(() => { ctr.autoRotate = true; }, 4000); });
+const node = gRoot.append('g').selectAll('g').data(nodesG).join('g').style('cursor', 'pointer');
+node.append('circle')
+  .attr('r', d => d.g === 'core' ? 11 : (d.hub ? 6.8 : 4.2))
+  .attr('fill', d => colors[d.g] || '#8b96a5')
+  .attr('fill-opacity', d => d.g === 'core' ? 1 : 0.9)
+  .attr('stroke', d => colors[d.g] || '#8b96a5')
+  .attr('stroke-opacity', 0.55).attr('stroke-width', 1.4);
 
-// камера: ставим на шар и подгоняем масштаб
-Graph.cameraPosition({ x: 0, y: 0, z: 340 });
-setTimeout(() => Graph.cameraPosition({ x: 0, y: 0, z: 780 }), 300);
-window.addEventListener('resize', () => { const e=document.getElementById('graph'); Graph.width(e.clientWidth).height(e.clientHeight); });
+node.append('text')
+  .text(d => d.id)
+  .attr('x', d => (d.g === 'core' ? 16 : (d.hub ? 11 : 7.5)))
+  .attr('y', 3.4)
+  .attr('font-family', 'Inter, system-ui, sans-serif')
+  .attr('font-size', d => d.g === 'core' ? 13 : (d.hub ? 11.5 : 9.5))
+  .attr('font-weight', d => d.hub ? 600 : 400)
+  .attr('fill', d => (d.hub || d.g === 'core') ? '#e6ebf2' : '#8f9aa9')
+  .attr('paint-order', 'stroke')
+  .attr('stroke', '#0b0d10').attr('stroke-width', 3);
+
+const sim = d3.forceSimulation(nodesG)
+  .force('link', d3.forceLink(linksG).id(d => d.id)
+    .distance(d => d.source.id === 'Хайрбек' ? 120 : 66).strength(0.6))
+  .force('charge', d3.forceManyBody().strength(d => d.hub ? -900 : -170))
+  .force('center', d3.forceCenter(W / 2, H / 2))
+  .force('collide', d3.forceCollide().radius(d => d.hub ? 34 : 19))
+  .on('tick', () => {
+    link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+        .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+    node.attr('transform', d => `translate(${d.x},${d.y})`);
+  });
+
+node.call(d3.drag()
+  .on('start', (e, d) => { if (!e.active) sim.alphaTarget(0.25).restart(); d.fx = d.x; d.fy = d.y; })
+  .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
+  .on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
+
+const tip = d3.select('body').append('div')
+  .style('position', 'fixed').style('pointer-events', 'none').style('opacity', 0)
+  .style('background', '#12161b').style('border', '1px solid #2a323d').style('border-radius', '10px')
+  .style('padding', '10px 12px').style('max-width', '280px').style('z-index', 99)
+  .style('transition', 'opacity .15s')
+  .style('box-shadow', '0 8px 28px rgba(0,0,0,.55)');
+
+node.on('mouseover', (e, d) => {
+  d3.select(e.currentTarget).select('circle').attr('filter', 'url(#glow)');
+  tip.style('opacity', 1).html(
+    `<div style="font:600 13px Inter,sans-serif;color:${colors[d.g] || '#eef1f5'};margin-bottom:4px">${d.id}</div>` +
+    `<div style="font:12px/1.45 Inter,sans-serif;color:#a8b3c1">${DESCS[d.id] || ''}</div>`);
+})
+.on('mousemove', e => tip.style('left', (e.clientX + 14) + 'px').style('top', (e.clientY + 14) + 'px'))
+.on('mouseout', e => { d3.select(e.currentTarget).select('circle').attr('filter', null); tip.style('opacity', 0); });
 </script>
 </body>
 </html>

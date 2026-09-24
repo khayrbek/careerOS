@@ -92,6 +92,8 @@
   <!-- KPI -->
   <div class="grid g4" id="kpi" style="margin-bottom:18px"></div>
 
+  <div id="loading" class="card" style="margin-bottom:18px; padding:16px; text-align:center; color:var(--muted); font-size:13px">Загрузка данных из CRM…</div>
+
   <!-- ЦЕЛИ -->
   <div class="card" style="margin-bottom:18px">
     <h2 style="margin-bottom:16px">🎯 Путь к целям</h2>
@@ -152,12 +154,19 @@ const STATUS = {
 const meta = s => STATUS[s] || {c:"#8b96a5", e:"•"};
 let chart;
 
-async function load(){
-  const r = await fetch('api/data'); const d = await r.json();
-  const items = d.items || [];
-  renderKPI(items); renderGoals(items); renderFunnel(items); renderChart(items);
-  renderTable(items); renderCompanies(d.companies || []);
-  renderOutreach(d.outreach || []);
+async function load(attempt = 0){
+  try {
+    const r = await fetch('api/data', { cache: 'no-store' });
+    const d = await r.json();
+    const items = d.items || [];
+    if (!items.length && attempt < 6) { setTimeout(() => load(attempt + 1), 1500); return; }
+    const ld = document.getElementById('loading'); if (ld) ld.style.display = 'none';
+    renderKPI(items); renderGoals(items); renderFunnel(items); renderChart(items);
+    renderTable(items); renderCompanies(d.companies || []);
+    renderOutreach(d.outreach || []);
+  } catch (e) {
+    if (attempt < 6) setTimeout(() => load(attempt + 1), 1500);
+  }
 }
 
 function renderKPI(items){

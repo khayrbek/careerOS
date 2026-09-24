@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Веб-дашборд поиска работы — читает CRM из Google Sheets, отдаёт HTML + JSON API."""
-import json, subprocess, time, os
+import json, subprocess, time, os, threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 SHEET_ID = "1cNzjNK8gZMwag8TbJ1SmwNViaIlRDzDfS4EGNWf-kvY"
@@ -141,5 +141,15 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
+    # фоновый прогрев кэша: первый запрос отвечает мгновенно
+    def _warm():
+        while True:
+            try:
+                read_sheet(); read_companies(); read_outreach()
+            except Exception as e:
+                print("warm:", str(e)[:120])
+            time.sleep(40)
+
+    threading.Thread(target=_warm, daemon=True).start()
     print(f"Дашборд: http://0.0.0.0:{PORT}")
     ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()

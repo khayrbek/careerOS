@@ -7,6 +7,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 SHEET_ID = "1cNzjNK8gZMwag8TbJ1SmwNViaIlRDzDfS4EGNWf-kvY"
 COMPANIES_SHEET_ID = "13I_d2FiGd3xZ3yx6Y9dV7pw6dleVkDhk1UCjRXgr3zc"
 OUTREACH_SHEET_ID = "1GwnXoOGTYnTGHR1s29Wv0Y3xg7bZPp_MkKrZbMgTHb4"
+BACKLOG_SHEET_ID = "1ktRp6EftgVRRwPBI8EmnLou3CuQxlxp3zG8yTnYisaM"
 GAPI = "/root/.hermes/skills/productivity/google-workspace/scripts/google_api.py"
 PY = "/usr/local/lib/hermes-agent/venv/bin/python3"
 PORT = 8902
@@ -46,6 +47,7 @@ def normalize_companies(rows):
 
 
 _oc = {"t": 0, "rows": []}
+_bc = {"t": 0, "rows": []}
 
 
 def read_outreach():
@@ -74,6 +76,34 @@ def normalize_outreach(rows):
         out.append({"date": row[0], "company": row[1], "contact": row[2],
                     "position": row[3], "channel": row[4], "reason": row[5],
                     "message": row[6], "status": row[7], "reply": row[8]})
+    return out
+
+
+def read_backlog():
+    now = time.time()
+    if now - _bc["t"] < CACHE_TTL and _bc["rows"]:
+        return _bc["rows"]
+    try:
+        r = subprocess.run([PY, GAPI, "sheets", "get", BACKLOG_SHEET_ID, "Бэклог!A1:F500"],
+                           capture_output=True, text=True, timeout=30)
+        rows = json.loads(r.stdout) if r.stdout.strip() else []
+    except Exception:
+        rows = []
+    _bc["t"] = now
+    _bc["rows"] = rows
+    return rows
+
+
+def normalize_backlog(rows):
+    if not rows:
+        return []
+    out = []
+    for row in rows[1:]:
+        row = (row + [""] * (6 - len(row)))[:6]
+        if not any(c.strip() for c in row):
+            continue
+        out.append({"task": row[0], "project": row[1], "priority": row[2],
+                    "status": row[3], "deadline": row[4], "comment": row[5]})
     return out
 
 
@@ -129,7 +159,10 @@ class Handler(BaseHTTPRequestHandler):
             items = normalize(read_sheet())
             companies = normalize_companies(read_companies())
             outreach = normalize_outreach(read_outreach())
-            self._send(200, json.dumps({"items": items, "companies": companies, "outreach": outreach}, ensure_ascii=False))
+            backlog = normalize_backlog(read_backlog())
+            self._send(200, json.dumps({"items": items, "companies": companies,
+                                        "outreach": outreach, "backlog": backlog},
+                                       ensure_ascii=False).encode("utf-8"), "application/json")
         elif self.path in ("/", "/index.html"):
             try:
                 with open(os.path.join(BASE_DIR, "index.html"), "rb") as f:
@@ -154,6 +187,12 @@ class Handler(BaseHTTPRequestHandler):
                     self._send(200, f.read(), "text/html; charset=utf-8")
             except FileNotFoundError:
                 self._send(404, "applications.html not found", "text/plain; charset=utf-8")
+        elif self.path in ("/backlog", "/backlog/", "/backlog.html", "/roadmap", "/roadmap/"):
+            try:
+                with open(os.path.join(BASE_DIR, "backlog.html"), "rb") as f:
+                    self._send(200, f.read(), "text/html; charset=utf-8")
+            except FileNotFoundError:
+                self._send(404, "backlog.html not found", "text/plain; charset=utf-8")
         else:
             self._send(404, "not found", "text/plain; charset=utf-8")
 
@@ -163,7 +202,7 @@ if __name__ == "__main__":
     def _warm():
         while True:
             try:
-                read_sheet(); read_companies(); read_outreach()
+                read_sheet(); read_companies(); read_outreach(); read_backlog()
             except Exception as e:
                 print("warm:", str(e)[:120])
             time.sleep(40)

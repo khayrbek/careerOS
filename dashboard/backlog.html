@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>careerOS — бэклог</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0d10;--card:#12161b;--line:#232a33;--line2:#2e3742;--fg:#e6ebf2;--muted:#8b96a5;--accent:#4ade80;--cyan:#38bdf8;--violet:#a78bfa;--amber:#fbbf24;--rose:#fb7185}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:'Space Grotesk',system-ui,sans-serif;font-size:14px;line-height:1.5;
+  background-image:radial-gradient(600px 400px at 80% -10%,rgba(74,222,128,.07),transparent),radial-gradient(700px 500px at -10% 110%,rgba(56,189,248,.05),transparent)}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 20px 60px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-bottom:28px}
+.logo{font-weight:700;font-size:22px;letter-spacing:-.5px}
+.logo span{color:var(--accent)}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+a.btn{display:inline-block;padding:7px 13px;border:1px solid var(--line2);border-radius:9px;color:var(--muted);
+  text-decoration:none;font-size:13px;transition:.15s}
+a.btn:hover{color:var(--fg);border-color:var(--accent)}
+a.btn.active{color:var(--fg);border-color:var(--accent);background:rgba(74,222,128,.08)}
+h1{font-size:26px;margin-bottom:6px}
+.sub{color:var(--muted);font-size:14px;margin-bottom:26px}
+.mono{font-family:'JetBrains Mono',monospace}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:26px}
+.kpi .k{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.kpi .k .n{font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:600;line-height:1}
+.kpi .k .t{color:var(--muted);font-size:12px;margin-top:6px}
+.proj{margin-bottom:26px}
+.proj-h{display:flex;align-items:baseline;gap:10px;padding-bottom:10px;border-bottom:2px solid var(--line2);margin-bottom:12px}
+.proj-h .name{font-weight:700;font-size:16px}
+.proj-h .cnt{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:13px}
+.proj-h .bar{flex:1;height:6px;background:var(--line);border-radius:99px;overflow:hidden;min-width:80px}
+.proj-h .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--cyan));border-radius:99px}
+.task{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start}
+.task:hover{border-color:var(--line2)}
+.task .pri{font-family:'JetBrains Mono',monospace;font-size:13px;flex-shrink:0;width:34px;text-align:center}
+.task .body{flex:1}
+.task .tt{font-weight:600;font-size:14px}
+.task .cm{color:var(--muted);font-size:12.5px;margin-top:2px}
+.task .meta{font-size:11.5px;color:var(--muted);margin-top:5px}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11.5px;border:1px solid;white-space:nowrap}
+.st-done{color:#4ade80;border-color:#4ade8055}
+.st-prog{color:#fbbf24;border-color:#fbbf2455}
+.st-new{color:#38bdf8;border-color:#38bdf855}
+.st-pause{color:#8b96a5;border-color:#8b96a555}
+footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">career<span>OS</span></div>
+    <nav>
+      <a class="btn" href="/careeros/">Дашборд</a>
+      <a class="btn" href="/careeros/about/">О продукте</a>
+      <a class="btn" href="/careeros/outreach/">Аутрич</a>
+      <a class="btn" href="/careeros/applications/">Отклики</a>
+      <a class="btn active" href="/careeros/backlog/">Бэклог</a>
+    </nav>
+  </header>
+
+  <h1>Бэклог проекта</h1>
+  <div class="sub">Задачи careerOS и смежных треков — видно, что готово, что в работе, что дальше.</div>
+
+  <div class="kpi" id="kpi"></div>
+  <div id="projects"></div>
+
+  <footer>careerOS — система персонального карьерного развития · данные из Google Sheets (бэклог)</footer>
+</div>
+
+<script>
+const API = '/careeros/api/data';
+
+function statusMeta(s){
+  const t = (s||'').toLowerCase();
+  if (t.includes('готово')) return {c:'#4ade80', cls:'st-done', label:'Готово'};
+  if (t.includes('работе')) return {c:'#fbbf24', cls:'st-prog', label:'В работе'};
+  if (t.includes('стоп')) return {c:'#8b96a5', cls:'st-pause', label:'Стоп'};
+  return {c:'#38bdf8', cls:'st-new', label:'Новая'};
+}
+function priColor(p){
+  if (!p) return '#8b96a5';
+  if (p.includes('🔴')) return '#fb7185';
+  if (p.includes('🥇')) return '#4ade80';
+  if (p.includes('🥈')) return '#38bdf8';
+  return '#8b96a5';
+}
+
+async function load(){
+  const r = await fetch(API, {cache:'no-store'});
+  const d = await r.json();
+  const b = d.backlog || [];
+
+  const done = b.filter(x => (x.status||'').includes('готово')).length;
+  const prog = b.filter(x => (x.status||'').includes('работе')).length;
+  const nnew = b.filter(x => (x.status||'').includes('новая')).length;
+  const pause = b.filter(x => (x.status||'').includes('стоп')).length;
+
+  document.getElementById('kpi').innerHTML = `
+    <div class="k"><div class="n" style="color:var(--accent)">${b.length}</div><div class="t">всего задач</div></div>
+    <div class="k"><div class="n" style="color:#4ade80">${done}</div><div class="t">готово</div></div>
+    <div class="k"><div class="n" style="color:#fbbf24">${prog}</div><div class="t">в работе</div></div>
+    <div class="k"><div class="n" style="color:#38bdf8">${nnew}</div><div class="t">новых</div></div>
+    <div class="k"><div class="n" style="color:#8b96a5">${pause}</div><div class="t">на стопе</div></div>`;
+
+  // группировка по проекту
+  const groups = {};
+  b.forEach(t => {
+    const p = t.project || 'Прочее';
+    (groups[p] = groups[p] || []).push(t);
+  });
+
+  document.getElementById('projects').innerHTML = Object.entries(groups).map(([proj, items]) => {
+    const dn = items.filter(x => (x.status||'').includes('готово')).length;
+    const pct = items.length ? Math.round(dn/items.length*100) : 0;
+    return `<div class="proj">
+      <div class="proj-h">
+        <span class="name">${proj}</span>
+        <span class="cnt">${items.length}</span>
+        <div class="bar"><i style="width:${pct}%"></i></div>
+        <span class="cnt mono">${pct}%</span>
+      </div>
+      ${items.map(t => {
+        const m = statusMeta(t.status);
+        return `<div class="task">
+          <div class="pri" style="color:${priColor(t.priority)}">${t.priority||''}</div>
+          <div class="body">
+            <div class="tt">${t.task}</div>
+            ${t.comment ? `<div class="cm">${t.comment}</div>`:''}
+            ${t.deadline ? `<div class="meta">⏱ ${t.deadline}</div>`:''}
+          </div>
+          <span class="pill ${m.cls}">${m.label}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+load();
+</script>
+</body>
+</html>

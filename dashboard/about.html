@@ -20,27 +20,49 @@ body{background:var(--bg); color:var(--fg); font-family:'Space Grotesk',system-u
 a{color:var(--accent); text-decoration:none}
 .mono{font-family:'JetBrains Mono',monospace}
 header{display:flex; justify-content:space-between; align-items:center; padding:14px 0 26px; border-bottom:1px solid var(--line); margin-bottom:36px}
-.brand{font-weight:700; font-size:18px; letter-spacing:-.3px}
-.brand b{color:var(--accent)}
+.brand{font-weight:700; font-size:18px}.brand b{color:var(--accent)}
 .btn{display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border:1px solid var(--line2); border-radius:10px; color:var(--fg); font-size:13px; background:var(--bg2); transition:.15s}
 .btn:hover{border-color:var(--accent); color:var(--accent)}
-.btn.primary{background:var(--accent); border-color:var(--accent); color:#06230f; font-weight:600}
 h1{font-size:44px; line-height:1.05; letter-spacing:-1.5px; font-weight:700}
 h1 b{color:var(--accent)}
-.sub{color:var(--muted); font-size:16px; line-height:1.55; max-width:640px; margin-top:14px}
-h2{font-size:26px; letter-spacing:-.6px; margin:54px 0 22px}
+.sub{color:var(--muted); font-size:16px; line-height:1.6; max-width:680px; margin-top:14px}
+h2{font-size:26px; letter-spacing:-.6px; margin:56px 0 20px}
 h2 .dot{color:var(--accent)}
 .card{background:var(--bg2); border:1px solid var(--line); border-radius:16px; padding:22px}
 .grid{display:grid; gap:16px}
 .g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
 .kpi{font-family:'JetBrains Mono',monospace; font-size:30px; font-weight:600; color:var(--accent)}
-.mut{color:var(--muted); font-size:13px}
+.mut{color:var(--muted); font-size:13.5px; line-height:1.5}
 .tag{display:inline-block; font-family:'JetBrains Mono',monospace; font-size:11.5px; padding:4px 9px; border-radius:7px; border:1px solid var(--line2); color:var(--muted); margin:2px 3px 2px 0}
 .tag.g{color:var(--accent); border-color:rgba(74,222,128,.35)}
+/* таблица функций */
+.tbl{width:100%; border-collapse:collapse; font-size:14px}
+.tbl td{padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top}
+.tbl td:first-child{font-weight:600; color:var(--accent); white-space:nowrap; font-family:'JetBrains Mono',monospace; font-size:13px}
+.tbl td:last-child{color:var(--muted)}
+.tbl tr:last-child td{border-bottom:none}
+/* слои архитектуры */
+.layer{display:flex; align-items:center; gap:14px; padding:13px 16px; border:1px solid var(--line); border-radius:12px; background:var(--bg2); margin-bottom:8px}
+.layer .n{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent); min-width:92px; font-weight:600}
+.layer .d{font-size:13.5px; color:var(--muted)}
+.arrow{text-align:center; color:var(--accent); font-size:16px; margin:2px 0}
 svg text{font-family:'JetBrains Mono',monospace}
 svg .lbl{fill:var(--muted); font-size:11px}
 svg .nm{fill:var(--fg); font-size:13px; font-weight:600}
+/* инженерные решения */
+.sol{display:flex; gap:14px; padding:16px; border:1px solid var(--line); border-radius:12px; background:var(--bg2)}
+.sol .idx{font-family:'JetBrains Mono',monospace; color:var(--accent); font-weight:700; font-size:16px}
+.sol .t{font-weight:600; font-size:14.5px}
+.sol .d{color:var(--muted); font-size:13px; line-height:1.55; margin-top:4px}
+/* результаты */
+.metric{background:var(--bg2); border:1px solid var(--line); border-radius:14px; padding:16px 18px}
+.metric .v{font-family:'JetBrains Mono',monospace; font-size:26px; font-weight:600; color:var(--accent)}
+.metric .l{color:var(--muted); font-size:12.5px; margin-top:4px}
 .footer{margin-top:60px; padding-top:22px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px}
+ul.clean{list-style:none; padding:0}
+ul.clean li{padding:8px 0 8px 22px; position:relative; color:var(--muted); font-size:14px}
+ul.clean li::before{content:'▸'; position:absolute; left:0; color:var(--accent)}
 </style>
 </head>
 <body>
@@ -49,37 +71,57 @@ svg .nm{fill:var(--fg); font-size:13px; font-weight:600}
   <header>
     <div class="brand">career<b>OS</b></div>
     <nav style="display:flex; gap:10px">
-      <a class="btn" href="/dash/">← Дашборд</a>
+      <a class="btn" href="/careeros/">← Дашборд</a>
       <a class="btn" href="/">azhimoff.ru</a>
     </nav>
   </header>
 
   <h1>careerOS — <b>система персонального<br>карьерного развития</b></h1>
-  <p class="sub">Личная операционная система поиска работы на базе ИИ. Собирает вакансии из шести источников, оценивает релевантность, генерирует письма, ведёт аутрич и воронку — всё в одном дашборде.</p>
+  <p class="sub">Персональная операционная система поиска работы на базе ИИ. Собирает вакансии из шести источников, оценивает релевантность, генерирует письма, ведёт аутрич и воронку — всё в одном дашборде.</p>
 
   <div class="grid g3" style="margin-top:30px">
     <div class="card"><div class="kpi">6</div><div class="mut">источников вакансий</div></div>
     <div class="card"><div class="kpi">36</div><div class="mut">целевых компаний</div></div>
-    <div class="card"><div class="kpi">4</div><div class="mut">ИИ-модели под капотом</div></div>
+    <div class="card"><div class="kpi">25×</div><div class="mut">быстрее отклик (1 мин вместо 25)</div></div>
   </div>
 
-  <h2><span class="dot">●</span> Цели системы</h2>
-  <div class="grid g3">
-    <div class="card">
-      <div class="mono" style="color:var(--accent); font-size:13px">ЦЕЛЬ 1</div>
-      <h3 style="margin:8px 0 6px">Оффер мечты</h3>
-      <p class="mut" style="font-size:14px; line-height:1.5">Дойти до оффера в ИИ / HR-Tech — через целевой ShortList, точечный аутрич и персональные отклики.</p>
-    </div>
-    <div class="card">
-      <div class="mono" style="color:var(--cyan); font-size:13px">ЦЕЛЬ 2</div>
-      <h3 style="margin:8px 0 6px">Доход ≥ 360 000 ₽</h3>
-      <p class="mut" style="font-size:14px; line-height:1.5">Целевая вилка через позиции руководителя / директора продукта в HR-Tech и ИИ.</p>
-    </div>
-    <div class="card">
-      <div class="mono" style="color:var(--violet); font-size:13px">ЦЕЛЬ 3</div>
-      <h3 style="margin:8px 0 6px">Портфолио</h3>
-      <p class="mut" style="font-size:14px; line-height:1.5">Живой продукт (careerOS) как доказательство компетенций для работодателя.</p>
-    </div>
+  <h2><span class="dot">●</span> Задача</h2>
+  <div class="card">
+    <p class="mut" style="font-size:15px; line-height:1.65; color:var(--fg)">
+      Поиск работы — фрагментированный процесс: вакансии разбросаны по hh.ru, Telegram-каналам и мессенджерам; отклики пишутся руками; статусы теряются; непонятно, что работает, а что нет.
+      <b style="color:var(--accent)">careerOS превращает это в управляемую систему с метриками.</b>
+    </p>
+  </div>
+
+  <h2><span class="dot">●</span> Что делает система</h2>
+  <div class="card" style="padding:8px 8px">
+    <table class="tbl">
+      <tr><td>Сбор</td><td>вакансии из Telegram-каналов, мессенджера MAX и hh.ru (включая «Избранное»)</td></tr>
+      <tr><td>Нормализация</td><td>единая база: компания, должность, требования, ссылка, источник</td></tr>
+      <tr><td>Классификация</td><td>определение роли (HR-Tech / AI / IT-проекты / продукт) по описанию</td></tr>
+      <tr><td>Скоринг</td><td>оценка релевантности 1–10, отсев нерелевантного</td></tr>
+      <tr><td>Генерация писем</td><td>LLM пишет сопроводительное под требования конкретной вакансии</td></tr>
+      <tr><td>Авто-отклики</td><td>Playwright-автоматизация hh.ru с предохранителями</td></tr>
+      <tr><td>Переписка</td><td>чтение входящих и отправка ответов в чатах hh</td></tr>
+      <tr><td>Аутрич</td><td>прямые сообщения нанимателям в Сетке / LinkedIn — в обход вакансий</td></tr>
+      <tr><td>CRM</td><td>Google Sheets: воронка статусов, история, следующий шаг</td></tr>
+      <tr><td>Дашборд</td><td>веб-панель: KPI, воронка, динамика, ShortList, трек целей</td></tr>
+    </table>
+  </div>
+
+  <h2><span class="dot">●</span> Архитектура пайплайна</h2>
+  <div class="card">
+    <div class="layer"><span class="n">ИСТОЧНИКИ</span><span class="d">Telegram · MAX · hh.ru · Сетка · LinkedIn</span></div>
+    <div class="arrow">▼</div>
+    <div class="layer"><span class="n">КОЛЛЕКТОРЫ</span><span class="d">парсинг, дедупликация, извлечение вакансий</span></div>
+    <div class="arrow">▼</div>
+    <div class="layer"><span class="n">СКОРИНГ</span><span class="d">роль → нужное резюме → приоритет (релевантность 1–10)</span></div>
+    <div class="arrow">▼</div>
+    <div class="layer"><span class="n">LLM</span><span class="d">генерация письма: требования вакансии + факты → письмо</span></div>
+    <div class="arrow">▼</div>
+    <div class="layer"><span class="n">ДЕЙСТВИЯ</span><span class="d">отклики (Playwright + hh) · аутрич (Сетка) · переписка</span></div>
+    <div class="arrow">▼</div>
+    <div class="layer"><span class="n">CRM + ДАШБОРД</span><span class="d">воронка · KPI · ShortList · трек целей</span></div>
   </div>
 
   <h2><span class="dot">●</span> Источники и контур</h2>
@@ -88,11 +130,9 @@ svg .nm{fill:var(--fg); font-size:13px; font-weight:600}
       <defs>
         <marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4ade80"/></marker>
       </defs>
-      <!-- центр -->
       <circle cx="450" cy="160" r="58" fill="rgba(74,222,128,.12)" stroke="#4ade80" stroke-width="2"/>
       <text x="450" y="156" text-anchor="middle" class="nm" fill="#4ade80" font-size="15">careerOS</text>
       <text x="450" y="174" text-anchor="middle" class="lbl">дашборд · управление</text>
-      <!-- узлы -->
       <g>
         <circle cx="130" cy="70" r="38" fill="#13161c" stroke="#38bdf8" stroke-width="1.5"/><text x="130" y="66" text-anchor="middle" class="nm" fill="#38bdf8">hh.ru</text><text x="130" y="82" text-anchor="middle" class="lbl">вакансии</text>
         <line x1="168" y1="84" x2="396" y2="128" stroke="#38bdf8" stroke-opacity=".5" stroke-width="1.2" marker-end="url(#ar)"/>
@@ -117,56 +157,63 @@ svg .nm{fill:var(--fg); font-size:13px; font-weight:600}
     </svg>
   </div>
 
-  <h2><span class="dot">●</span> Мультиагентная модель</h2>
+  <h2><span class="dot">●</span> Мультиагентная модель (MoA)</h2>
   <div class="card">
     <svg viewBox="0 0 900 300" width="100%" style="max-width:900px; display:block; margin:0 auto">
-      <!-- 4 модели -->
       <g><circle cx="120" cy="80" r="44" fill="rgba(74,222,128,.1)" stroke="#4ade80" stroke-width="1.5"/><text x="120" y="74" text-anchor="middle" class="nm" fill="#4ade80">GPT</text><text x="120" y="90" text-anchor="middle" class="lbl">gpt-6-sol</text></g>
       <g><circle cx="330" cy="50" r="44" fill="rgba(56,189,248,.1)" stroke="#38bdf8" stroke-width="1.5"/><text x="330" y="44" text-anchor="middle" class="nm" fill="#38bdf8">DeepSeek</text><text x="330" y="60" text-anchor="middle" class="lbl">v4-flash</text></g>
       <g><circle cx="120" cy="220" r="44" fill="rgba(251,191,36,.1)" stroke="#fbbf24" stroke-width="1.5"/><text x="120" y="214" text-anchor="middle" class="nm" fill="#fbbf24">Яндекс</text><text x="120" y="230" text-anchor="middle" class="lbl">GPT-5-pro</text></g>
       <g><circle cx="330" cy="250" r="44" fill="rgba(167,139,250,.1)" stroke="#a78bfa" stroke-width="1.5"/><text x="330" y="244" text-anchor="middle" class="nm" fill="#a78bfa">GigaChat</text><text x="330" y="260" text-anchor="middle" class="lbl">3-Ultra</text></g>
-      <!-- оркестратор -->
       <rect x="585" y="100" width="200" height="100" rx="16" fill="rgba(74,222,128,.12)" stroke="#4ade80" stroke-width="2"/>
       <text x="685" y="138" text-anchor="middle" class="nm" fill="#4ade80" font-size="15">MoA</text>
       <text x="685" y="156" text-anchor="middle" class="lbl">оркестратор</text>
       <text x="685" y="172" text-anchor="middle" class="lbl">синтез ответа</text>
-      <!-- связи -->
       <line x1="164" y1="88" x2="585" y2="125" stroke="#4ade80" stroke-opacity=".45" stroke-width="1.2" marker-end="url(#ar)"/>
       <line x1="374" y1="60" x2="585" y2="130" stroke="#38bdf8" stroke-opacity=".45" stroke-width="1.2" marker-end="url(#ar)"/>
       <line x1="164" y1="212" x2="585" y2="175" stroke="#fbbf24" stroke-opacity=".45" stroke-width="1.2" marker-end="url(#ar)"/>
       <line x1="374" y1="240" x2="585" y2="170" stroke="#a78bfa" stroke-opacity=".45" stroke-width="1.2" marker-end="url(#ar)"/>
     </svg>
     <p class="mut" style="font-size:14px; margin-top:10px; line-height:1.55">
-      Под капотом — <b style="color:var(--fg)">мультиагентность</b>: четыре модели отвечают параллельно (каждая со своей «школой» и силой), а флагман <b style="color:var(--accent)">gpt-6-sol</b> синтезирует лучший ответ. Для рутины — быстрые модели; для сложного (стратегия, разбор вакансий) — совет моделей <span class="mono">/moa</span>.
+      Под капотом — <b style="color:var(--fg)">мультиагентность</b>: четыре модели отвечают параллельно (каждая со своей «школой» и силой), а флагман <b style="color:var(--accent)">gpt-6-sol</b> синтезирует лучший ответ. Рутина — на быстрых моделях; сложное (стратегия, разбор вакансий) — через совет моделей <span class="mono">/moa</span>.
     </p>
   </div>
 
-  <h2><span class="dot">●</span> Что автоматизировано</h2>
+  <h2><span class="dot">●</span> Ключевые инженерные решения</h2>
+  <div class="grid g2">
+    <div class="sol"><div class="idx">1</div><div><div class="t">Human-in-the-loop vs автоматизация</div><div class="d">отклики автоматически, но с жёсткими лимитами (10/день, паузы, стоп при капче); переписка — под контролем</div></div></div>
+    <div class="sol"><div class="idx">2</div><div><div class="t">LLM вместо шаблонов</div><div class="d">персонализация письма под требования вакансии даёт заметно более высокий отклик</div></div></div>
+    <div class="sol"><div class="idx">3</div><div><div class="t">Мультиканальность</div><div class="d">один пайплайн на разные источники — единая база и единая воронка</div></div></div>
+    <div class="sol"><div class="idx">4</div><div><div class="t">Анти-детект</div><div class="d">человекоподобное поведение, рандомные паузы, лимиты — чтобы не спровоцировать защиту платформы</div></div></div>
+    <div class="sol"><div class="idx">5</div><div><div class="t">Обезличивание PII</div><div class="d">персональные данные — только в рабочем контуре; аналитика на обезличенных данных (152-ФЗ)</div></div></div>
+    <div class="sol"><div class="idx">6</div><div><div class="t">Мультиагентность</div><div class="d">совет моделей (MoA): параллельные ответы + флагман-синтезатор — выше качество, меньше галлюцинаций</div></div></div>
+  </div>
+
+  <h2><span class="dot">●</span> Результаты (реальные данные)</h2>
   <div class="grid g3">
-    <div class="card">
-      <h3 style="margin-bottom:10px; font-size:16px">Сбор</h3>
-      <div><span class="tag g">hh.ru</span><span class="tag g">Telegram</span><span class="tag g">MAX</span><span class="tag">Сетка</span><span class="tag">LinkedIn</span></div>
-      <p class="mut" style="margin-top:10px; font-size:13.5px">Парсинг вакансий и контактов из всех каналов в единую базу.</p>
-    </div>
-    <div class="card">
-      <h3 style="margin-bottom:10px; font-size:16px">Скоринг</h3>
-      <div><span class="tag g">релевантность</span><span class="tag g">когорты</span><span class="tag g">ShortList 36</span></div>
-      <p class="mut" style="margin-top:10px; font-size:13.5px">Оценка релевантности, приоритизация по целевым компаниям.</p>
-    </div>
-    <div class="card">
-      <h3 style="margin-bottom:10px; font-size:16px">Действия</h3>
-      <div><span class="tag g">письма</span><span class="tag g">отклики</span><span class="tag g">аутрич</span><span class="tag g">чаты</span></div>
-      <p class="mut" style="margin-top:10px; font-size:13.5px">Генерация сопроводительных, авто-отклики, аутрич, переписка.</p>
-    </div>
+    <div class="metric"><div class="v">300+</div><div class="l">собрано вакансий</div></div>
+    <div class="metric"><div class="v">36</div><div class="l">целевых компаний (ShortList)</div></div>
+    <div class="metric"><div class="v">25×</div><div class="l">быстрее: ~25 мин → ~1 мин на отклик</div></div>
+  </div>
+
+  <h2><span class="dot">●</span> Что демонстрирует проект</h2>
+  <div class="card">
+    <ul class="clean">
+      <li>Проектирование AI-агентных пайплайнов под реальную задачу</li>
+      <li>Работу с LLM API и промпт-инжиниринг (генерация, персонализация, контроль фактов)</li>
+      <li>Интеграции: Playwright-автоматизация, REST API, Google Workspace, Bot API</li>
+      <li>Продуктовое мышление: метрики, воронка, KPI, дашборд, целевой трек</li>
+      <li>Инженерную зрелость: guardrails, обработка ошибок, идемпотентность, логирование</li>
+      <li>ИБ-грамотность: разграничение доступа, PII, 152-ФЗ</li>
+    </ul>
   </div>
 
   <h2><span class="dot">●</span> Стек</h2>
   <div class="card">
     <div style="margin-bottom:6px">
-      <span class="tag g">Python</span><span class="tag g">Node.js</span><span class="tag">SQL</span><span class="tag">Playwright</span><span class="tag">Google Sheets API</span><span class="tag">D3 / SVG</span>
+      <span class="tag g">Python</span><span class="tag g">Playwright</span><span class="tag">Node.js</span><span class="tag">SQL</span><span class="tag">Google Sheets API</span><span class="tag">D3 / SVG</span>
     </div>
     <div>
-      <span class="tag">GPT-6</span><span class="tag">DeepSeek</span><span class="tag">YandexGPT</span><span class="tag">GigaChat</span><span class="tag">RAG</span><span class="tag">AI-агенты</span><span class="tag">systemd</span><span class="tag">nginx</span>
+      <span class="tag">GPT-6-sol</span><span class="tag">DeepSeek</span><span class="tag">YandexGPT</span><span class="tag">GigaChat</span><span class="tag">RAG</span><span class="tag">AI-агенты</span><span class="tag">MoA</span><span class="tag">systemd</span><span class="tag">nginx</span>
     </div>
   </div>
 

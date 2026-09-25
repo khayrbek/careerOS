@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>careerOS — отклики</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0d10; --bg2:#13161c; --line:#232a34; --line2:#2e3742;
+  --fg:#eef1f5; --muted:#8b97a6; --accent:#4ade80; --cyan:#38bdf8; --amber:#fbbf24; --rose:#fb7185; --violet:#a78bfa}
+*{box-sizing:border-box; margin:0; padding:0}
+body{background:var(--bg); color:var(--fg); font-family:'Space Grotesk',system-ui,sans-serif;
+  background-image:radial-gradient(ellipse 80% 50% at 50% -10%, rgba(74,222,128,.07), transparent)}
+.mono{font-family:'JetBrains Mono',monospace}
+.wrap{max-width:1150px; margin:0 auto; padding:20px 20px 60px}
+header{display:flex; justify-content:space-between; align-items:center; padding:14px 0 22px; border-bottom:1px solid var(--line); margin-bottom:28px; flex-wrap:wrap; gap:10px}
+.brand{font-weight:700; font-size:18px}.brand b{color:var(--accent)}
+.btn{display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border:1px solid var(--line2); border-radius:9px; color:var(--fg); font-size:13px; background:var(--bg2); text-decoration:none}
+.btn:hover{border-color:var(--accent); color:var(--accent)}
+h1{font-size:30px; letter-spacing:-.8px; font-weight:700}
+h1 b{color:var(--accent)}
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin:22px 0 26px}
+.kpi{background:var(--bg2); border:1px solid var(--line); border-radius:14px; padding:18px}
+.kpi .v{font-family:'JetBrains Mono',monospace; font-size:28px; font-weight:600}
+.kpi .l{color:var(--muted); font-size:12.5px; margin-top:4px}
+.filters{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:22px; align-items:center}
+input[type=text]{background:var(--bg2); border:1px solid var(--line2); border-radius:9px; padding:9px 13px; color:var(--fg); font-size:13px; width:250px; outline:none}
+input[type=text]:focus{border-color:var(--accent)}
+.chip{padding:7px 13px; border:1px solid var(--line2); border-radius:20px; font-size:12.5px; cursor:pointer; color:var(--muted); background:transparent; transition:.12s}
+.chip.on{background:var(--accent); border-color:var(--accent); color:#06230f; font-weight:600}
+table{width:100%; border-collapse:collapse; font-size:13.5px}
+th{text-align:left; color:var(--muted); font-weight:600; font-size:11.5px; text-transform:uppercase; letter-spacing:.4px; padding:10px 12px; border-bottom:1px solid var(--line2)}
+td{padding:11px 12px; border-bottom:1px solid var(--line); vertical-align:top}
+tr:hover td{background:rgba(255,255,255,.02)}
+.vac{font-weight:600; color:var(--fg)}
+.vac a{color:var(--fg); text-decoration:none}
+.vac a:hover{color:var(--accent)}
+.co{color:var(--cyan)}
+.sc{font-family:'JetBrains Mono',monospace; font-size:12px}
+.badge{font-family:'JetBrains Mono',monospace; font-size:10.5px; padding:2px 8px; border-radius:6px; white-space:nowrap}
+.b-n{background:rgba(139,151,166,.15); color:var(--muted); border:1px solid rgba(139,151,166,.3)}
+.b-a{background:rgba(74,222,128,.12); color:var(--accent); border:1px solid rgba(74,222,128,.3)}
+.b-i{background:rgba(251,191,36,.12); color:var(--amber); border:1px solid rgba(251,191,36,.3)}
+.b-o{background:rgba(56,189,248,.12); color:var(--cyan); border:1px solid rgba(56,189,248,.3)}
+.b-r{background:rgba(251,113,133,.12); color:var(--rose); border:1px solid rgba(251,113,133,.3)}
+.empty{padding:30px; text-align:center; color:var(--muted); font-size:14px; border:1px solid var(--line); border-radius:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">career<b>OS</b> · отклики</div>
+    <nav style="display:flex; gap:10px">
+      <a class="btn" href="/careeros/">← Дашборд</a>
+      <a class="btn" href="/careeros/outreach/">Аутрич</a>
+      <a class="btn" href="/careeros/about/">О продукте</a>
+    </nav>
+  </header>
+
+  <h1>Отклики — <b>детально</b></h1>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="filters">
+    <input type="text" id="q" placeholder="Поиск: вакансия / компания" oninput="render()">
+    <button class="chip on" data-s="all" onclick="setStatus('all',this)">Все</button>
+    <button class="chip" data-s="Новая" onclick="setStatus('Новая',this)">Новые</button>
+    <button class="chip" data-s="Отклик" onclick="setStatus('Отклик',this)">Отклики</button>
+    <button class="chip" data-s="Собеседование" onclick="setStatus('Собеседование',this)">Собеседования</button>
+    <button class="chip" data-s="Оффер" onclick="setStatus('Оффер',this)">Офферы</button>
+    <button class="chip" data-s="Отказ" onclick="setStatus('Отказ',this)">Отказы</button>
+  </div>
+
+  <div class="card" style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Вакансия</th><th>Компания</th><th>Рел.</th><th>Статус</th><th>Источник</th><th>Дата</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+let DATA = [];
+let curStatus = 'all';
+
+async function load(){
+  try {
+    const r = await fetch('/careeros/api/data', {cache:'no-store'});
+    const d = await r.json();
+    DATA = d.items || [];
+  } catch(e){ DATA = []; }
+  render();
+}
+
+function setStatus(s, el){
+  curStatus = s;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  render();
+}
+
+function statusOf(x){
+  const st = (x.status || '').toLowerCase();
+  if (st.includes('отказ')) return 'Отказ';
+  if (st.includes('оффер')) return 'Оффер';
+  if (st.includes('собес')) return 'Собеседование';
+  if (st.includes('отклик') || x.applied) return 'Отклик';
+  return 'Новая';
+}
+
+function render(){
+  const cnt = s => DATA.filter(x => statusOf(x) === s).length;
+  const n = cnt('Новая'), a = cnt('Отклик'), i = cnt('Собеседование'), o = cnt('Оффер'), r = cnt('Отказ');
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi"><div class="v">${DATA.length}</div><div class="l">всего вакансий</div></div>
+    <div class="kpi"><div class="v" style="color:var(--accent)">${a}</div><div class="l">откликов</div></div>
+    <div class="kpi"><div class="v" style="color:var(--amber)">${i}</div><div class="l">собеседований</div></div>
+    <div class="kpi"><div class="v" style="color:var(--cyan)">${o}</div><div class="l">офферов</div></div>
+    <div class="kpi"><div class="v" style="color:var(--rose)">${r}</div><div class="l">отказов</div></div>`;
+
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  let list = DATA.filter(x => {
+    const s = statusOf(x);
+    if (curStatus !== 'all' && s !== curStatus) return false;
+    if (q){ const hay = (x.vacancy+' '+x.company).toLowerCase(); if (!hay.includes(q)) return false; }
+    return true;
+  });
+
+  // сортировка: по релевантности убыв
+  list.sort((a,b) => (parseFloat(b.relevance)||0) - (parseFloat(a.relevance)||0));
+
+  const badge = s => ({ 'Новая':'b-n','Отклик':'b-a','Собеседование':'b-i','Оффер':'b-o','Отказ':'b-r' }[s] || 'b-n');
+  const rel = x => { const v = parseFloat(x.relevance); if (!v) return '—'; return v>=8 ? `<span class="sc" style="color:var(--accent)">${v}</span>` : (v>=6 ? `<span class="sc" style="color:var(--amber)">${v}</span>` : `<span class="sc" style="color:var(--muted)">${v}</span>`); };
+
+  document.getElementById('rows').innerHTML = list.map(x => {
+    const s = statusOf(x);
+    const vac = x.url ? `<a href="${x.url}" target="_blank" rel="noopener">${x.vacancy||'—'}</a>` : (x.vacancy||'—');
+    return `<tr>
+      <td class="vac">${vac}</td>
+      <td class="co">${x.company||'—'}</td>
+      <td>${rel(x)}</td>
+      <td><span class="badge ${badge(s)}">${s}</span></td>
+      <td class="sc" style="color:var(--muted)">${x.source||'—'}</td>
+      <td class="sc" style="color:var(--muted)">${x.date||'—'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" class="empty">Нет записей под фильтр</td></tr>';
+}
+
+load();
+</script>
+</body>
+</html>

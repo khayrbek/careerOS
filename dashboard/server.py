@@ -142,6 +142,18 @@ class Handler(BaseHTTPRequestHandler):
                     self._send(200, f.read(), "text/html; charset=utf-8")
             except FileNotFoundError:
                 self._send(404, "about.html not found", "text/plain; charset=utf-8")
+        elif self.path in ("/outreach", "/outreach/", "/outreach.html"):
+            try:
+                with open(os.path.join(BASE_DIR, "outreach.html"), "rb") as f:
+                    self._send(200, f.read(), "text/html; charset=utf-8")
+            except FileNotFoundError:
+                self._send(404, "outreach.html not found", "text/plain; charset=utf-8")
+        elif self.path in ("/applications", "/applications/", "/applications.html", "/responses", "/responses/"):
+            try:
+                with open(os.path.join(BASE_DIR, "applications.html"), "rb") as f:
+                    self._send(200, f.read(), "text/html; charset=utf-8")
+            except FileNotFoundError:
+                self._send(404, "applications.html not found", "text/plain; charset=utf-8")
         else:
             self._send(404, "not found", "text/plain; charset=utf-8")
 

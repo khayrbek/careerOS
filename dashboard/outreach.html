@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>careerOS — аутрич</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0d10; --bg2:#13161c; --line:#232a34; --line2:#2e3742;
+  --fg:#eef1f5; --muted:#8b97a6; --accent:#4ade80; --cyan:#38bdf8; --amber:#fbbf24; --rose:#fb7185; --violet:#a78bfa}
+*{box-sizing:border-box; margin:0; padding:0}
+body{background:var(--bg); color:var(--fg); font-family:'Space Grotesk',system-ui,sans-serif;
+  background-image:radial-gradient(ellipse 80% 50% at 50% -10%, rgba(74,222,128,.07), transparent)}
+.mono{font-family:'JetBrains Mono',monospace}
+.wrap{max-width:1100px; margin:0 auto; padding:20px 20px 60px}
+header{display:flex; justify-content:space-between; align-items:center; padding:14px 0 22px; border-bottom:1px solid var(--line); margin-bottom:28px; flex-wrap:wrap; gap:10px}
+.brand{font-weight:700; font-size:18px}.brand b{color:var(--accent)}
+.btn{display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border:1px solid var(--line2); border-radius:9px; color:var(--fg); font-size:13px; background:var(--bg2); text-decoration:none}
+.btn:hover{border-color:var(--accent); color:var(--accent)}
+h1{font-size:30px; letter-spacing:-.8px; font-weight:700}
+h1 b{color:var(--accent)}
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin:22px 0 26px}
+.kpi{background:var(--bg2); border:1px solid var(--line); border-radius:14px; padding:18px}
+.kpi .v{font-family:'JetBrains Mono',monospace; font-size:28px; font-weight:600}
+.kpi .l{color:var(--muted); font-size:12.5px; margin-top:4px}
+.card{background:var(--bg2); border:1px solid var(--line); border-radius:14px}
+.filters{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:22px; align-items:center}
+input[type=text]{background:var(--bg2); border:1px solid var(--line2); border-radius:9px; padding:9px 13px; color:var(--fg); font-size:13px; width:240px; outline:none}
+input[type=text]:focus{border-color:var(--accent)}
+.chip{padding:7px 13px; border:1px solid var(--line2); border-radius:20px; font-size:12.5px; cursor:pointer; color:var(--muted); background:transparent; transition:.12s}
+.chip.on{background:var(--accent); border-color:var(--accent); color:#06230f; font-weight:600}
+.grp{margin-bottom:26px}
+.grp-h{display:flex; align-items:center; gap:10px; font-weight:700; font-size:15px; margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid var(--line2)}
+.grp-h .cnt{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted)}
+.row{display:flex; justify-content:space-between; align-items:flex-start; gap:14px; padding:13px 16px; border-bottom:1px solid var(--line); flex-wrap:wrap}
+.row:last-child{border-bottom:none}
+.row .who{font-weight:600; font-size:14.5px}
+.row .pos{color:var(--muted); font-size:12.5px; margin-top:2px}
+.row .co{font-size:12.5px; color:var(--cyan); margin-top:2px}
+.badge{font-family:'JetBrains Mono',monospace; font-size:11px; padding:3px 9px; border-radius:6px; white-space:nowrap}
+.b-lid{background:rgba(56,189,248,.12); color:var(--cyan); border:1px solid rgba(56,189,248,.3)}
+.b-sent{background:rgba(74,222,128,.12); color:var(--accent); border:1px solid rgba(74,222,128,.3)}
+.b-reply{background:rgba(251,191,36,.12); color:var(--amber); border:1px solid rgba(251,191,36,.3)}
+.b-no{background:rgba(251,113,133,.12); color:var(--rose); border:1px solid rgba(251,113,133,.3)}
+.pri{font-family:'JetBrains Mono',monospace; font-size:11px; margin-top:4px}
+.empty{padding:30px; text-align:center; color:var(--muted); font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">career<b>OS</b> · аутрич</div>
+    <nav style="display:flex; gap:10px">
+      <a class="btn" href="/careeros/">← Дашборд</a>
+      <a class="btn" href="/careeros/about/">О продукте</a>
+    </nav>
+  </header>
+
+  <h1>Аутрич — <b>детально</b></h1>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="filters">
+    <input type="text" id="q" placeholder="Поиск: имя / компания / должность" oninput="render()">
+    <button class="chip on" data-s="all" onclick="setStatus('all',this)">Все</button>
+    <button class="chip" data-s="Лид" onclick="setStatus('Лид',this)">Лиды</button>
+    <button class="chip" data-s="Отправлено" onclick="setStatus('Отправлено',this)">Отправлено</button>
+    <button class="chip" data-s="Ответ" onclick="setStatus('Ответ',this)">Ответ</button>
+    <button class="chip" data-s="Отказ" onclick="setStatus('Отказ',this)">Отказ</button>
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<script>
+let DATA = [];
+let curStatus = 'all';
+
+async function load(){
+  try {
+    const r = await fetch('/careeros/api/data', {cache:'no-store'});
+    const d = await r.json();
+    DATA = d.outreach || [];
+  } catch(e){ DATA = []; }
+  render();
+}
+
+function setStatus(s, el){
+  curStatus = s;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  render();
+}
+
+function render(){
+  // KPI
+  const cnt = s => DATA.filter(x => x.status === s).length;
+  const leads = cnt('Лид'), sent = cnt('Отправлено'), reply = cnt('Ответ'), no = cnt('Отказ');
+  const total = DATA.length;
+  const conv = sent ? Math.round(reply/sent*100) : 0;
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi"><div class="v" style="color:var(--cyan)">${leads}</div><div class="l">лидов (ожидают)</div></div>
+    <div class="kpi"><div class="v" style="color:var(--accent)">${sent}</div><div class="l">отправлено</div></div>
+    <div class="kpi"><div class="v" style="color:var(--amber)">${reply}</div><div class="l">ответов · конверсия ${conv}%</div></div>
+    <div class="kpi"><div class="v" style="color:var(--rose)">${no}</div><div class="l">отказов</div></div>
+    <div class="kpi"><div class="v">${total}</div><div class="l">всего контактов</div></div>`;
+
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  let list = DATA.filter(x => {
+    if (curStatus !== 'all' && x.status !== curStatus) return false;
+    if (q) { const hay = (x.company+' '+(x.contact||'')+' '+(x.position||'')).toLowerCase(); if (!hay.includes(q)) return false; }
+    return true;
+  });
+
+  // группировка по статусу
+  const order = ['Лид','Отправлено','Ответ','Отказ'];
+  const groups = {};
+  list.forEach(x => { const k = x.status || 'Лид'; (groups[k] = groups[k]||[]).push(x); });
+
+  const stColor = { 'Лид':'#38bdf8', 'Отправлено':'#4ade80', 'Ответ':'#fbbf24', 'Отказ':'#fb7185' };
+  const stBadge = { 'Лид':'b-lid', 'Отправлено':'b-sent', 'Ответ':'b-reply', 'Отказ':'b-no' };
+  const stLabel = { 'Лид':'Лид', 'Отправлено':'Отправлено', 'Ответ':'Ответ', 'Отказ':'Отказ' };
+
+  const html = order.filter(k => groups[k]).map(k => `
+    <div class="grp">
+      <div class="grp-h"><span style="color:${stColor[k]}">●</span> ${stLabel[k]} <span class="cnt">${groups[k].length}</span></div>
+      <div class="card">
+        ${groups[k].map(x => `
+          <div class="row">
+            <div>
+              <div class="who">${x.contact || '—'}</div>
+              <div class="pos">${x.position || ''}</div>
+              <div class="co">${x.company || ''}${x.channel ? ' · '+x.channel : ''}</div>
+              ${x.pri ? `<div class="pri">${x.pri}</div>` : ''}
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px">
+              <span class="badge ${stBadge[k]}">${stLabel[k]}</span>
+              ${x.reply ? `<span class="pos" style="max-width:220px; text-align:right">${x.reply}</span>` : ''}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+
+  document.getElementById('list').innerHTML = html || '<div class="empty">Нет записей под фильтр</div>';
+}
+
+load();
+</script>
+</body>
+</html>

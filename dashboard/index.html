@@ -84,7 +84,7 @@
       <p class="label" style="margin-top:6px">Система персонального карьерного развития · Ажимов Хайрбек</p>
     </div>
     <div style="display:flex; gap:10px; align-items:center">
-      <a class="btn" href="/dash/about/">О продукте</a>
+      <a class="btn" href="/careeros/about/">О продукте</a>
       <a class="btn" href="https://azhimoff.ru/" style="text-decoration:none">← На главную</a>
       <button class="btn" onclick="load()">↻ Обновить</button>
     </div>
@@ -109,7 +109,10 @@
 
   <!-- АУТРИЧ -->
   <div class="card" style="margin-bottom:18px">
-    <h2 style="margin-bottom:6px">🤝 Аутрич (Сетка / LinkedIn / TG)</h2>
+    <div style="display:flex; justify-content:space-between; align-items:baseline">
+      <h2 style="margin-bottom:6px">🤝 Аутрич (Сетка / LinkedIn / TG)</h2>
+      <a class="btn" href="/careeros/outreach/" style="font-size:12px">Все →</a>
+    </div>
     <p class="label" style="margin-bottom:16px">прямые сообщения нанимателям — в обход вакансий</p>
     <div class="grid g4" id="outreach-kpi" style="margin-bottom:16px"></div>
     <div id="outreach"></div>
@@ -117,7 +120,10 @@
 
   <!-- ВАКАНСИИ -->
   <div class="card" style="margin-bottom:18px">
-    <h2 style="margin-bottom:16px">📋 Вакансии</h2>
+    <div style="display:flex; justify-content:space-between; align-items:baseline">
+      <h2 style="margin-bottom:16px">📋 Вакансии</h2>
+      <a class="btn" href="/careeros/applications/" style="font-size:12px">Все →</a>
+    </div>
     <div style="overflow-x:auto">
       <table>
         <thead><tr>
@@ -255,7 +261,7 @@ function renderChart(items){
 }
 
 function renderTable(items){
-  document.getElementById('rows').innerHTML = items.slice().reverse().map(i => {
+  document.getElementById('rows').innerHTML = items.slice().reverse().slice(0, 6).map(i => {
     const m = meta(i.status);
     const vac = i.url ? `<a href="${i.url}" target="_blank" rel="noopener">${i.vacancy||'—'}</a>` : (i.vacancy||'—');
     return `<tr>
@@ -313,13 +319,12 @@ function renderOutreach(list){
     return;
   }
   el.innerHTML = `<div style="overflow-x:auto"><table><thead><tr>
-      <th>Дата</th><th>Компания</th><th>Контакт</th><th>Канал</th><th>Повод</th><th>Статус</th><th>Ответ</th>
-    </tr></thead><tbody>${list.slice().reverse().map(o => `<tr>
+      <th>Дата</th><th>Компания</th><th>Контакт</th><th>Канал</th><th>Статус</th><th>Ответ</th>
+    </tr></thead><tbody>${list.slice().reverse().slice(0, 6).map(o => `<tr>
       <td class="mono" style="color:var(--muted); font-size:12px">${o.date||''}</td>
       <td>${o.company||''}</td>
       <td style="color:var(--muted)">${o.contact||''}</td>
       <td><span class="pill">${o.channel||''}</span></td>
-      <td class="label" style="text-transform:none; letter-spacing:0">${o.reason||''}</td>
       <td>${o.status||''}</td>
       <td style="color:var(--accent)">${o.reply||''}</td>
     </tr>`).join('')}</tbody></table></div>`;

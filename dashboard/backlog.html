@@ -92,7 +92,7 @@ function priColor(p){
 async function load(){
   const r = await fetch(API, {cache:'no-store'});
   const d = await r.json();
-  const b = d.backlog || [];
+  const b = (d.backlog || []).filter(x => (x.project||'').trim() !== 'ПРОФПОТОК');
 
   const done = b.filter(x => (x.status||'').includes('готово')).length;
   const prog = b.filter(x => (x.status||'').includes('работе')).length;
